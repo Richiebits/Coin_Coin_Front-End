@@ -1,6 +1,6 @@
 body {
     margin:0;
-    background-color: F5F7F8;
+    background-color: #F5F7F8;
 }
 header {
     position:fixed;
@@ -8,7 +8,7 @@ header {
     width: 100%;
 }
 #head {
-    background-color: FCDE70;
+    background-color: #FCDE70;
     display: flex;
     
     margin:0;
@@ -29,20 +29,20 @@ header {
 #circle {
     height: 8rem;
     width: 8rem;
-    background-color: white;
+    background-color: #F5F7F8;
     border-radius: 50%;
     position: absolute;
     z-index: 1;
     margin:1rem;
 }
 #nav {
-    background-color: E8B86D;
+    background-color: #E8B86D;
     margin: 0;
     display: flex;
     
 }
 a.pages {       
-    color: F5F7F8;
+    color: #F5F7F8;
     text-decoration: none;
     margin-left: 3em;
     margin-top:0.5em;
@@ -57,7 +57,7 @@ a.pages:hover {
 }
 
 footer {
-    background-color: 45474B;
+    background-color: #45474B;
     display: flex;
     flex-direction: row;
     height: 15rem;
@@ -66,7 +66,7 @@ footer {
 }
 
 footer p a {
-    color: F5F7F8;
+    color: #F5F7F8;
     font-family: "Galindo";
     display: flex;
     flex-direction: column;
