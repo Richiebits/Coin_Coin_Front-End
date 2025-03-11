@@ -1,15 +1,23 @@
 body {
     margin:0;
+    background-color: F5F7F8;
+}
+header {
+    position:fixed;
+    top: 0;
+    width: 100%;
 }
 #head {
     background-color: FCDE70;
     display: flex;
+    
     margin:0;
     font-family: 'Junge';
     color: 45474B;
     font-size: x-large;
     align-items: center;
     height: 9rem;
+
 }
 
 #logo {
@@ -34,7 +42,7 @@ body {
     
 }
 a.pages {       
-    color: white;
+    color: F5F7F8;
     text-decoration: none;
     margin-left: 3em;
     margin-top:0.5em;
@@ -48,3 +56,28 @@ a.pages:hover {
     
 }
 
+footer {
+    background-color: 45474B;
+    display: flex;
+    flex-direction: row;
+    height: 15rem;
+    justify-content: space-around;
+    align-items: center;
+}
+
+footer p a {
+    color: F5F7F8;
+    font-family: "Galindo";
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2px;
+    text-decoration: none;
+}
+footer p a:hover {
+    text-decoration: underline;
+}
+
+footer img {
+    height: 10rem;
+}
