@@ -34,6 +34,9 @@ body {
     
 }
 a.pages {       
+    display: block;
+    position: relative;
+    padding: 0.2em 0;
     color: white;
     text-decoration: none;
     margin-left: 3em;
@@ -43,8 +46,22 @@ a.pages {
     font-family: "Galindo";
 }
 
-a.pages:hover {
-    text-decoration: underline;
-    
-}
+a.pages::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0.15em;
+    background-color: rgb(31, 27, 27);
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 300ms, transform 300ms;
+  }
+  
+  a.pages:hover::after,
+  a.pages:focus::after {
+    opacity: 1;
+    transform: translate3d(0, 0.15em, 0);
+  }
 
