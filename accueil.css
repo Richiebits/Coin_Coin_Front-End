@@ -1,0 +1,50 @@
+body {
+    margin:0;
+}
+#head {
+    background-color: FCDE70;
+    display: flex;
+    margin:0;
+    font-family: 'Junge';
+    color: 45474B;
+    font-size: x-large;
+    align-items: center;
+    height: 9rem;
+}
+
+#logo {
+    height: 8rem;
+    position: relative;
+    margin: 1rem;
+    z-index: 2;
+}
+#circle {
+    height: 8rem;
+    width: 8rem;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 1;
+    margin:1rem;
+}
+#nav {
+    background-color: E8B86D;
+    margin: 0;
+    display: flex;
+    
+}
+a.pages {       
+    color: white;
+    text-decoration: none;
+    margin-left: 3em;
+    margin-top:0.5em;
+    margin-right: 3em;
+    margin-bottom: 0.5em;
+    font-family: "Galindo";
+}
+
+a.pages:hover {
+    text-decoration: underline;
+    
+}
+
