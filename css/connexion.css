@@ -21,7 +21,7 @@ body {
     -webkit-transform: rotate(2deg);
     -ms-transform: rotate(2deg);
     transform: rotate(2deg);
-    transition-duration: 1s;
+    transition-duration: 2s;
 }
 
 #logo {
@@ -60,8 +60,10 @@ body {
     justify-content: center;
     align-items: center;
     text-align: center;
-    top: 10rem;
+    top: 5rem;
     right: 20%;
+    opacity: 100;
+    transition: opacity 1s ease-in-out;
     
     
 }
@@ -74,8 +76,10 @@ body {
     align-items: center;
     text-align: center;
     top: 2rem;
-    left: 15%
-    
+    left: 15%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease-in-out;    
 }
 .goRegister, .goLogin {
     top: 100%;
@@ -84,6 +88,15 @@ body {
 #toggle:checked ~ .section {
     transform: translateX(115%) rotate(-4deg);
     
+}
+#toggle:checked ~ .connection {
+    opacity: 0;
+    pointer-events: none;
+    
+}
+#toggle:checked ~ .register {
+    opacity: 100;
+    pointer-events: all;
 }
 input[type=checkbox] {
     display: none;
@@ -109,6 +122,9 @@ label {
     font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     text-align: center;
     font-weight: bolder;
+}
+.register .textbox{
+    height: 2em;
 }
 .textbox:focus{
     border-style: solid;
