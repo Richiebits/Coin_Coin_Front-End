@@ -38,12 +38,16 @@ body {
     
 }
 /*****ACCUEIL-PROJETS-GRAPHIQUE-COMPTE*****/
+
+a{
+  text-decoration: none;
+}
+
 a.pages {       
     display: block;
     position: relative;
     padding: 0.2em 0;
     color: white;
-    text-decoration: none;
     margin-left: 3em;
     margin-top:0.5em;
     margin-right: 3em;
@@ -87,6 +91,7 @@ a.pages::after {
     padding-bottom: 3em;
     background-color: #F4CE14;
     border-radius: 10px;
+    color:black;
     text-align: center; 
     font-family: "Galindo", sans-serif;
     display: flex;
