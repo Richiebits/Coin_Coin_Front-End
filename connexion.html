@@ -3,6 +3,7 @@
         <link href='https://fonts.googleapis.com/css?family=Junge' rel='stylesheet'>
         <link href='https://fonts.googleapis.com/css?family=Galindo' rel='stylesheet'>
         <link rel="stylesheet" href="css/connexion.css">
+        <script type="module" src="/JavaScript/connexion.js"></script>
         <title>Coin Coin</title>
     </head>
     <body>
@@ -15,27 +16,27 @@
                     <input type="email" class="textbox"><br>
                     <label for="password">Mot de passe</label><br>
                     <input type="password" class="textbox"><br>
-                    <input type="submit" value="Se connecter" >
+                    <input type="button" value="Se connecter" >
                 </form>
                 <label for="toggle" class="button goRegister">Je n'ai pas de compte</label>
             </div>
             
             <div class="register">
-                <form action="">
+                <form action="POST" id="rForm">
                     <h1>Créer un comte</h1>
                     <label for="nom">Nom</label><br>
-                    <input type="text" class="textbox"><br>
+                    <input type="text" class="textbox" id="rNom"><br>
                     <label for="prenom">Prenom</label><br>
-                    <input type="text" class="textbox"><br>
+                    <input type="text" class="textbox" id="rPrenom"><br>
                     <label for="email">Email</label><br>
-                    <input type="email" class="textbox"><br>
-                    <label for="tel">No Telephone</label><br>
-                    <input type="tel" class="textbox"><br>
+                    <input type="email" class="textbox" id="rEmail"><br>
+                    <label for="tel">No Telephone (facultatif)</label><br>
+                    <input type="tel" class="textbox" id="rTel"><br>
                     <label for="password1">Mot de passe</label><br>
-                    <input type="password" class="textbox"><br>
+                    <input type="password" class="textbox" id="rMDP1"><br>
                     <label for="password2">Confirmer Mot de passe</label><br>
-                    <input type="password" class="textbox"><br>
-                    <input type="submit" value="Confimer" >
+                    <input type="password" class="textbox" id="rMDP2"><br>
+                    <input type="button" value="Confimer" id="bRegister">
                 </form>
                 <label for="toggle" class="button goLogin">J'ai déjà un compte</label>
             </div>
