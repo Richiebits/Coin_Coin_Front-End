@@ -2,7 +2,8 @@
 //      :: "type" est le type de la requete, exe:"POST" ou "PUT" ou "GET" ou ...
 
 //Si le header, le body ou le data n'est pas fourni, les mets à null (ou vide)
-function fetchInfo(quelleInfo, type, headers = {}, body = null, data = null) {
+//Export pour que les autres fichiers puissent avoir accès a la fonction
+export function fetchInfo(quelleInfo, type, headers = {}, body = null, data = null) {
     let uri = "http://localhost:8000/api/" + quelleInfo;
     const fetchOptions = {
         method: type, 

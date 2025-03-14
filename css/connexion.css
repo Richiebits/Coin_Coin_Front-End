@@ -135,7 +135,7 @@ h1 {
     font-family: "Junge";
     color: black;
 }
-input[type=submit]{
+input[type=button]{
     font-family: "Galindo";
     padding: 10px 20px;
     margin-top: 0;
@@ -145,7 +145,10 @@ input[type=submit]{
     background-color: #59bf45;
     color: white;
 }
-input[type=submit]:hover {
+input[type=button]:hover {
     background-color: #3c852d;
 }
 
+.incomplet {
+    background-color: #c98b89;
+}
