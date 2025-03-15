@@ -7,7 +7,7 @@ function init(){
 
     const bRegister = document.getElementById("bRegister");
     bRegister.addEventListener("click", function() {
-        //Objet contenant tout les Inputs du formulaire Créer comte
+        //Objet contenant tout les Inputs du formulaire Créer compte
         const textboxes = { "TBNom": document.getElementById("rNom"),
                             "TBPrenom": document.getElementById("rPrenom"),
                             "TBEmail": document.getElementById("rEmail"),
@@ -23,6 +23,7 @@ function init(){
         let isComplete = false;
         //variable tell car elle est différente
         let tel = true;
+        let telValid = true;
         //Changement de couleur des Inputs a leurs couleurs de base
         for (const tb in textboxes){
             textboxes[tb].classList.remove("incomplet")
@@ -40,17 +41,42 @@ function init(){
         //Vérifications avant de faire la demande a l'API
         if (!parametres["tel"]){
             tel = false;
+            telValid = true;
         } else {
-            try {
-                parametres["tel"] = parseInt(parametres["tel"])
-            } catch (error) {
-                
+            let telValue = parseInt(parametres["tel"]);
+    
+            if (!isNaN(telValue)) {
+                telValid = true;
+                textboxes["TBTel"].classList.remove("incomplet");
+            } else {
+                telValid = false;
+                textboxes["TBTel"].classList.add("incomplet");
             }
         }
-        
+
+        //Vérification courriel
+        const regexEmail = new RegExp("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        if (!regexEmail.test(parametres["email"])){
+            isComplete = false;
+            textboxes["TBEmail"].classList.add("incomplet");
+        } else {
+            textboxes["TBEmail"].classList.remove("incomplet");
+        }
+
+        //Vérification mot de passe (8 char / au moins 1 nbr / au moins 1 / )
+        const regexMDP = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
+        if (!regexMDP.test(parametres["MDP1"])){
+            isComplete = false;
+            textboxes["TBMDP1"].classList.add("incomplet");
+            textboxes["TBMDP2"].classList.add("incomplet");
+        } else {
+            textboxes["TBMDP1"].classList.remove("incomplet");
+            textboxes["TBMDP2"].classList.remove("incomplet");
+        }
+
 
         //Vérification final pour API
-        if (isComplete && parametres["MDP1"] == parametres["MDP2"]){
+        if (isComplete && telValid && parametres["MDP1"] == parametres["MDP2"]){
             const data = {
                 email:parametres["email"],
                 nom:parametres["nom"],
@@ -58,8 +84,12 @@ function init(){
                 mot_de_passe:parametres["MDP2"]
             }
             if (tel){
-                data.tel = parametres[tel];
+                data.tel = parametres["tel"];
             }
+            for (const tb in textboxes){
+                textboxes[tb].value = "";
+            }
+            alert("Le compte a été créer avec succès");
             fetchInfo(  "client", 
                         "POST", 
                         {'Content-Type': 'application/json'}, 
