@@ -7,6 +7,7 @@ function init() {
     if (fileName.includes("graphiques.html")) {
         populateGraphique();
         populateGraphiqueProjet();
+        connectPoints();
     }
     if (fileName.includes("projets.html")) {
         populateGraphiqueProjet();
@@ -54,3 +55,4 @@ function highlightSelectedProject() {
         }
     });
 }
+
