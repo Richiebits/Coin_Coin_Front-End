@@ -86,7 +86,7 @@ a.pages::after {
     gap: 10px;
     max-height: 500px;
     width: 20%;
-    margin-right: 20px;
+    margin-right: 10px;
     border-color: black;
 }
 
@@ -98,7 +98,7 @@ a.pages::after {
     background-color: #D9D9D9;
     padding: 10px;
     margin-top: 10px;
-    width: 70%;
+    width: 80%;
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
@@ -150,28 +150,50 @@ a.pages::after {
   flex-grow: 1;
   background-color: #F5F5F5;
   border-radius: 5px;
+  overflow: visible;
   position: relative;
   height: 400px; 
   width: 100%;
   display: flex;
   align-items: flex-end;
   justify-content: space-around;
-  padding: 10px;
+  margin:0px;
+  padding: 0px;
   border: 1px solid #ccc;
 }
 
 .graphique::before {
   content: "";
   position: absolute;
-  top: 10px;
+  overflow: visible;
+  top: 0px;
   left: 10px;
   right: 10px;
-  bottom: 10px;
+  bottom: 0px;
   background: linear-gradient(to right, transparent 10%, rgba(0, 0, 0, 0.1) 10%);
               /*linear-gradient(to top, transparent 20%, rgba(0, 0, 0, 0.2) 20%);*/
   background-size: 100px 100px;
 }
 
+.graphique svg {
+  clip-path: none; 
+  overflow: visible;
+}
+
+.tooltip {
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+  font-size: 14px;
+  pointer-events: none; /* Évite d'intercepter les événements de la souris */
+  visibility: hidden;
+  z-index: 10;
+}
+
+
+/*
 .graphique .point {
   width: 10px;
   height: 10px;
@@ -187,7 +209,7 @@ a.pages::after {
   transform-origin: left center;
 }
 
-/* Exemple de positionnement des points et lignes */
+   Exemple de positionnement des points et lignes
 .point:nth-child(1) { left: 5%;  bottom: 5%; }
 .point:nth-child(2) { left: 10%; bottom: 30%; }
 .point:nth-child(3) { left: 20%; bottom: 60%; }
@@ -208,6 +230,8 @@ a.pages::after {
 .line:nth-child(17) { }
 .line:nth-child(18) { }
 .line:nth-child(19) { }
+*/
+
 
 html, body {
   height: 100%;

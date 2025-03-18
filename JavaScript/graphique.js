@@ -1,9 +1,10 @@
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
 document.addEventListener("DOMContentLoaded", function() {
     init();
     window.addEventListener("resize", () => {
-        connectPoints();
-        drawGraphGrid();
-    });
+        initGraphique();
+        });
 });
 
 function init() {
@@ -11,8 +12,7 @@ function init() {
     if (fileName.includes("graphiques.html")) {
         populateGraphique();
         populateGraphiqueProjet();
-
-        connectPoints();
+        initGraphique();
     }
     if (fileName.includes("projets.html")) {
         populateGraphiqueProjet();
@@ -61,38 +61,88 @@ function highlightSelectedProject() {
     });
 }
 
-function connectPoints() {
-    const points = document.querySelectorAll(".graphique .point");
-    const lines = document.querySelectorAll(".graphique .line");
-
-    if (points.length < 2 || lines.length < points.length - 1) {
-        console.error("Not enough points or lines to create the graph.");
+function initGraphique() {
+    const container = d3.select(".graphique").node();
+    if (!container) {
+        console.error("Element with class 'graphique' not found.");
         return;
     }
+    
+    d3.select(".graphique svg").remove();
 
-    for (let i = 0; i < points.length - 1; i++) {
-        const point1 = points[i].getBoundingClientRect();
-        const point2 = points[i + 1].getBoundingClientRect();
-        const line = lines[i];
+    const width = container.clientWidth;
+    const height = 400;
+    const margin = { top: 20, right: 0, bottom: 0, left: 0 };
 
-        const parentRect = document.querySelector(".graphique").getBoundingClientRect();
+    const data = [
+        { day: 0, value: 0 },
+        { day: 1, value: 5 },
+        { day: 5, value: 30 },
+        { day: 10, value: 60 },
+        { day: 15, value: 40 },
+        { day: 20, value: 42 },
+        { day: 25, value: 55 },
+        { day: 30, value: 85 }
+    ];
 
-        const x1 = point1.left + point1.width / 2 - parentRect.left;
-        const y1 = point1.top + point1.height / 2 - parentRect.top ;
-        const x2 = point2.left + point2.width / 2 - parentRect.left;
-        const y2 = point2.top + point2.height / 2 - parentRect.top;
+    const svg = d3.select(".graphique")
+        .append("svg")
+        .attr("width", "100%")
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`)
+        .style("overflow", "visible")
+        .style("position", "absolute");
 
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        const length = Math.sqrt(dx * dx + dy * dy);
-        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    const xScale = d3.scaleLinear().domain([0, 31]).range([0, width]);
+    const yScale = d3.scaleLinear().domain([0, 100]).range([height, 0]);
 
-        line.style.width = `${length}px`;
-        line.style.transform = `rotate(${angle}deg)`;
-        line.style.left = `${x1}px`;
-        line.style.top = `${y1}px`;
-    }
+    const line = d3.line().x(d => xScale(d.day)).y(d => yScale(d.value)).curve(d3.curveMonotoneX);
+    
+    svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
+        .attr("d", line);
+    
+    svg.selectAll("circle")
+        .data(data)
+        .enter().append("circle")
+        .attr("cx", d => xScale(d.day))
+        .attr("cy", d => yScale(d.value))
+        .attr("r", 5)
+        .attr("fill", "black");
+
+    svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
+    svg.append("g").call(d3.axisLeft(yScale));
+    /*
+    const tooltip = d3.select(".graphique")
+        .append("div")
+        .style("position", "absolute")
+        .style("background", "white")
+        .style("border", "1px solid black")
+        .style("padding", "5px")
+        .style("border-radius", "5px")
+        .style("visibility", "hidden")
+        .style("font-size", "14px");
+
+    svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "transparent")
+        
+    on("mousemove", function (event) {
+            const [mouseX, mouseY] = d3.pointer(event);
+            const xValue = Math.round(xScale.invert(mouseX));
+            const yValue = Math.round(yScale.invert(mouseY));
+            console.log("test");
+            tooltip.style("left", `${event.pageX + 10}px`)
+                   .style("top", `${event.pageY - 10}px`)
+                   .style("visibility", "visible")
+                   .text(`(${xValue},${yValue})`);
+        })
+        .on("mouseout", () => {
+            tooltip.style("visibility", "hidden");
+        });*/
 }
-
-
-
