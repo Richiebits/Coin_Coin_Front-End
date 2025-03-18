@@ -95,9 +95,29 @@ function init(){
                         {'Content-Type': 'application/json'}, 
                         null, data)
         }
-        
-        
-       
     })
+    const bLogin = document.getElementById("bLogin");
+    let compte = null;
+    bLogin.addEventListener("click", async function(){
+        //Objet contenant tout les Inputs du formulaire Login
+        const Ltextboxes = {    "TBEmail": document.getElementById("lEmail"),
+                                "TBMDP": document.getElementById("lMDP")}
+        const inputEmail = Ltextboxes["TBEmail"].value;
+        const inputMDP = Ltextboxes["TBMDP"].value;
+        const routeAPI = "client/email/" + inputEmail;
+        
+        try {
+            const response =  await fetchInfo(routeAPI, "GET", {'Content-Type': 'application/json'}, null, null);
+            if (response) {
+                compte = response;
+                console.log(compte[0]["mot_de_passe"])
+
+
+
+            }
+        } catch (error) {
+            console.error("Erreur lors de la récupération du compte:", error);}
+
+    });
 
 }
