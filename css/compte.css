@@ -71,6 +71,7 @@ a.pages::after {
     opacity: 1;
     transform: translate3d(0, 0.15em, 0);
   }
+
 form {
     margin: 3rem;
     display: flex;
@@ -82,7 +83,7 @@ form {
     border-radius: 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
-input[type="text"], input[type="email"], input[type="tel"],input[type="password"] {
+.textbox {
     background-color: #D9D9D9;
     border-radius: 10px;
     height: 2em;
@@ -101,6 +102,8 @@ label {
 main {
     justify-items: center;
 }
+
+
 input[type="button"]{
     font-family: "Galindo";
     padding: 10px 20px;
@@ -126,3 +129,8 @@ input[type=button]:hover {
     pointer-events: none;
     position: absolute;
 }
+.incomplet {
+    background-color: #c98b89;
+    
+}
+
