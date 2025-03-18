@@ -99,21 +99,22 @@ function init(){
     const bLogin = document.getElementById("bLogin");
     let compte = null;
     bLogin.addEventListener("click", async function(){
+        console.log("test")
         //Objet contenant tout les Inputs du formulaire Login
         const Ltextboxes = {    "TBEmail": document.getElementById("lEmail"),
                                 "TBMDP": document.getElementById("lMDP")}
         const inputEmail = Ltextboxes["TBEmail"].value;
         const inputMDP = Ltextboxes["TBMDP"].value;
-        const routeAPI = "client/email/" + inputEmail;
+        const routeAPI = "client/connexion";
+        const body = inputEmail + inputMDP;
         
         try {
-            const response =  await fetchInfo(routeAPI, "GET", {'Content-Type': 'application/json'}, null, null);
-            if (response) {
-                compte = response;
-                console.log(compte[0]["mot_de_passe"])
-
-
-
+            const response =  await fetchInfo(routeAPI, "POST", {'Content-Type': 'application/json'}, body, null);
+            if (response == false) {
+                console.error("Le mot de passe ou l'email est faux", error);
+            } else {
+                const id = response;
+                console.log(id);
             }
         } catch (error) {
             console.error("Erreur lors de la récupération du compte:", error);}

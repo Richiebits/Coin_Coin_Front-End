@@ -9,12 +9,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function init() {
     let fileName = location.href;
-    if (fileName.includes("graphiques.html")) {
+    if (fileName.includes("graphiques.php")) {
         populateGraphique();
         populateGraphiqueProjet();
         initGraphique();
     }
-    if (fileName.includes("projets.html")) {
+    if (fileName.includes("projets.php")) {
         populateGraphiqueProjet();
     }
 }
@@ -116,7 +116,7 @@ function initGraphique() {
 
     svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
     svg.append("g").call(d3.axisLeft(yScale));
-    /*
+    
     const tooltip = d3.select(".graphique")
         .append("div")
         .style("position", "absolute")
@@ -132,17 +132,18 @@ function initGraphique() {
         .attr("height", height)
         .attr("fill", "transparent")
         
-    on("mousemove", function (event) {
+    d3.select(".graphique")    
+    .on("mousemove", function (event) {
             const [mouseX, mouseY] = d3.pointer(event);
             const xValue = Math.round(xScale.invert(mouseX));
             const yValue = Math.round(yScale.invert(mouseY));
-            console.log("test");
-            tooltip.style("left", `${event.pageX + 10}px`)
-                   .style("top", `${event.pageY - 10}px`)
+
+            tooltip.style("left", `${mouseX + 10}px`)
+                   .style("top", `${mouseY - 25}px`)
                    .style("visibility", "visible")
                    .text(`(${xValue},${yValue})`);
         })
         .on("mouseout", () => {
             tooltip.style("visibility", "hidden");
-        });*/
+        });
 }
