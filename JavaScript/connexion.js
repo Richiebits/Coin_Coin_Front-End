@@ -93,7 +93,7 @@ function init(){
             fetchInfo(  "client", 
                         "POST", 
                         {'Content-Type': 'application/json'}, 
-                        null, data)
+                        data)
         }
     })
     const bLogin = document.getElementById("bLogin");
@@ -116,6 +116,10 @@ function init(){
                 const id = response;
                 console.log(id);
                 location.href("acceuil.html");
+                sessionStorage.setItem("id", id);
+                sessionStorage.setItem("email", inputEmail);
+                alert("Connection réussi!");
+                window.location.href = "acceuil.html";
             }
         } catch (error) {
             console.error("Erreur lors de la récupération du compte:", error);}
