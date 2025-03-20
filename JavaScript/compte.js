@@ -4,14 +4,17 @@ document.addEventListener("DOMContentLoaded", function(){
 })
 
 function init(){
-    const idCompte = 1//sessionStorage.getItem("userId");
-    const emailCompte = sessionStorage.getItem("email")
+    const idCompte = sessionStorage.getItem("id");
+    const emailCompte = sessionStorage.getItem("email");
+
+    console.log(idCompte)
+    console.log(emailCompte)
 
     const formModif = document.getElementById("modification");
     const formMDP = document.getElementById("password");
 
     const bModifer = document.getElementById("bModifier")
-    const bConfirmer = document.getElementById("bConfimer");
+    const bConfirmer = document.getElementById("bConfirmer");
     const bAnnuler = document.getElementById("bAnnuler")
 
     const textboxes = { "TBNom": document.getElementById("TBNom"),
@@ -73,24 +76,50 @@ function init(){
         formMDP.classList.add("hide");
     })
 
-    bModifer.addEventListener("click", async function(){
+    bConfirmer.addEventListener("click", async function(){
         const MDP = textboxes["TBPassword"].value;
         const route = "client/connexion";
-        const body = emailCompte + MDP;
+        const bodyConn = {  "email": emailCompte,
+                        "mot_de_passe": MDP};
         try {
-            const response = await fetchInfo(route, "POST", {'Content-Type': 'application/json'}, body, null);
-            if (response == false) {
+            const response = await fetchInfo(route, "POST", {}, bodyConn);
+
+            if (!response || Object.keys(response).length === 0) {
                 console.error("password incorrect", error);
+
             } else {
-                console.log("temp");
+
+                const routePut = "client/" + idCompte;
+                const newEmail = textboxes["TBEmail"].value;
+                const newNom = textboxes["TBNom"].value;
+                const newPrenom = textboxes["TBPrenom"].value;
+                const newTel = textboxes["TBTel"].value;
+
+                try {
+                    const bodyMod = {"email": newEmail, "nom":newNom, "prenom":newPrenom, "tel":newTel, "id":idCompte, "mot_de_passe":"Secure123!"}
+                    textboxes["TBPassword"].value = "";
+                    const responsePut = await fetchInfo(routePut, "PUT", {}, bodyMod);
+                    
+                    if (responsePut["success"] == true){
+                        sessionStorage.setItem("email", newEmail);
+                        formModif.classList.remove("hide");
+                        formMDP.classList.add("hide");
+                        
+                        alert(responsePut["message"]);
+                    } else {
+                        alert("erreur lors de la modification du compte")
+                        formModif.classList.remove("hide");
+                        formMDP.classList.add("hide");
+                    }
+                } catch (error){
+                    console.error("Erreur de modification", error);
+                }
             }
-
-        } catch{
-
+            
+        } catch (error){
+            console.error("Erreur de connexion", error);
         }
-        
-        
-        
-    })
+    
+    });
 
 }

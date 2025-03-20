@@ -93,13 +93,12 @@ function init(){
             fetchInfo(  "client", 
                         "POST", 
                         {'Content-Type': 'application/json'}, 
-                        null, data)
+                        data)
         }
     })
     const bLogin = document.getElementById("bLogin");
     let compte = null;
     bLogin.addEventListener("click", async function(){
-        console.log("test")
         //Objet contenant tout les Inputs du formulaire Login
         const Ltextboxes = {    "TBEmail": document.getElementById("lEmail"),
                                 "TBMDP": document.getElementById("lMDP")}
@@ -114,7 +113,10 @@ function init(){
                 console.error("Le mot de passe ou l'email est faux", error);
             } else {
                 const id = response;
-                console.log(id);
+                sessionStorage.setItem("id", id);
+                sessionStorage.setItem("email", inputEmail);
+                alert("Connection réussi!");
+                window.location.href = "acceuil.html";
             }
         } catch (error) {
             console.error("Erreur lors de la récupération du compte:", error);}
