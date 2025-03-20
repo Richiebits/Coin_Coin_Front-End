@@ -105,21 +105,30 @@ function init(){
         const inputEmail = Ltextboxes["TBEmail"].value;
         const inputMDP = Ltextboxes["TBMDP"].value;
         const routeAPI = "client/connexion";
-        const body = inputEmail + inputMDP;
+        const body = {"email": inputEmail, "mot_de_passe": inputMDP};
         
         try {
-            const response =  await fetchInfo(routeAPI, "POST", {'Content-Type': 'application/json'}, body, null);
-            if (response == false) {
-                console.error("Le mot de passe ou l'email est faux", error);
+            bLogin.classList.add("loading");
+            const response =  await fetchInfo(routeAPI, "POST", {}, body);
+            
+            if (!response || Object.keys(response).length === 0) {
+                console.error("password incorrect", error);
+                Ltextboxes["TBMDP"].value=""
+                bLogin.classList.remove("loading");
             } else {
-                const id = response;
+                const id = response["id"];
                 sessionStorage.setItem("id", id);
                 sessionStorage.setItem("email", inputEmail);
                 alert("Connection réussi!");
+                bLogin.classList.remove("loading");
                 window.location.href = "acceuil.html";
+                bLogin.classList.remove("loading");
             }
         } catch (error) {
             console.error("Erreur lors de la récupération du compte:", error);}
+            bLogin.classList.remove("loading");
+            Ltextboxes["TBMDP"].value=""
+            
 
     });
 

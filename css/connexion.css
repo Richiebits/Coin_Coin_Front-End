@@ -137,6 +137,7 @@ h1 {
 }
 input[type=button]{
     font-family: "Galindo";
+    pointer-events: all;
     padding: 10px 20px;
     margin-top: 0;
     font-size: 16px;
@@ -151,4 +152,9 @@ input[type=button]:hover {
 
 .incomplet {
     background-color: #c98b89;
+}
+
+input[type=button].loading {
+    background-color: #D9D9D9;
+    pointer-events: none;
 }

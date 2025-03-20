@@ -3,13 +3,12 @@ document.addEventListener("DOMContentLoaded", function(){
     init();
 })
 
-function init(){
+async function init(){
+    //Prendres les variables de sessions
     const idCompte = sessionStorage.getItem("id");
     const emailCompte = sessionStorage.getItem("email");
 
-    console.log(idCompte)
-    console.log(emailCompte)
-
+    //Prendre les éléments HTML du document pour pouvoir intéragir avec
     const formModif = document.getElementById("modification");
     const formMDP = document.getElementById("password");
 
@@ -17,21 +16,47 @@ function init(){
     const bConfirmer = document.getElementById("bConfirmer");
     const bAnnuler = document.getElementById("bAnnuler")
 
+    //Prendre tout les textboxes dans un objet pour pouvoir intéragi avec plus facilement
     const textboxes = { "TBNom": document.getElementById("TBNom"),
                         "TBPrenom": document.getElementById("TBPrenom"),
                         "TBEmail": document.getElementById("TBEmail"),
                         "TBTel": document.getElementById("TBTel"),
                         "TBPassword": document.getElementById("TBPassword")
                     }
+    
+    //Requete Get du client selon le id pour pouvoir insérer les info du client dans les textboxes
+    try {
+        const routecClient = "client/" + idCompte;
+        const responseClient = await fetchInfo(routecClient, "GET", {}, null)
+
+        if (!responseClient || Object.keys(responseClient).length === 0){
+            console.error("client vide");
+        } else {
+
+            //Mettre dans les textboxes les information courantes du client
+            textboxes["TBNom"].value = responseClient["nom"];
+            textboxes["TBPrenom"].value = responseClient["prenom"];
+            textboxes["TBEmail"].value = responseClient["email"];
+            textboxes["TBTel"].value = responseClient["tel"];
+        }
+
+    } catch (error){
+        console.error("Erreur lors de du get client", error);
+    }
+
+    //Evénements du boutton Modifier
     bModifer.addEventListener("click", function(){
         const parametres = {    "nom": textboxes["TBNom"].value,
                                 "prenom": textboxes["TBPrenom"].value,
                                 "email": textboxes["TBEmail"].value,
                                 "tel":textboxes["TBTel"].value
         }
+
+        //Variables pour voir si tout les champs sont complets
         let isComplete = false;
         let tel = true;
         let telValid = true;
+        //indicateur de champs incomplets
         for (const tb in textboxes){
             textboxes[tb].classList.remove("incomplet")
             isComplete = true;}
@@ -63,29 +88,37 @@ function init(){
             textboxes["TBEmail"].classList.remove("incomplet");
         }
 
-        console.log(isComplete);
-        console.log(telValid);
+        //Si tout les champs nécessaire sont complets on cache le form et demande le mot de passe pour confirmer
         if (isComplete && telValid){
             formModif.classList.add("hide");
             formMDP.classList.remove("hide");
         }
     })
     
+    //Boutton annuler au cas ou le client change d'avis
     bAnnuler.addEventListener("click", function() {
         formModif.classList.remove("hide");
         formMDP.classList.add("hide");
     })
 
+    //Boutton de confirmation de changements
     bConfirmer.addEventListener("click", async function(){
         const MDP = textboxes["TBPassword"].value;
         const route = "client/connexion";
         const bodyConn = {  "email": emailCompte,
                         "mot_de_passe": MDP};
+
+        //Requête POST qui vérifie si le mot de passe est correct
         try {
+            //classe loading pour empêcher le client d'envoyer plusieurs requêtes en même temps
+            bConfirmer.classList.add("loading");
+            bAnnuler.classList.add("loading");
             const response = await fetchInfo(route, "POST", {}, bodyConn);
 
             if (!response || Object.keys(response).length === 0) {
                 console.error("password incorrect", error);
+                bConfirmer.classList.remove("loading");
+                bAnnuler.classList.remove("loading");
 
             } else {
 
@@ -95,6 +128,7 @@ function init(){
                 const newPrenom = textboxes["TBPrenom"].value;
                 const newTel = textboxes["TBTel"].value;
 
+                //Si le mot de passe est correct on fait une autre requête PUT pour insérer dans la BD les nouvelles informations
                 try {
                     const bodyMod = {"email": newEmail, "nom":newNom, "prenom":newPrenom, "tel":newTel, "id":idCompte, "mot_de_passe":"Secure123!"}
                     textboxes["TBPassword"].value = "";
@@ -104,20 +138,30 @@ function init(){
                         sessionStorage.setItem("email", newEmail);
                         formModif.classList.remove("hide");
                         formMDP.classList.add("hide");
+                        //On débloque le bouton confirmer une fois terminé
+                        bConfirmer.classList.remove("loading");
+                        bAnnuler.classList.remove("loading");
                         
                         alert(responsePut["message"]);
+                        classList.remove("loading");
                     } else {
                         alert("erreur lors de la modification du compte")
                         formModif.classList.remove("hide");
                         formMDP.classList.add("hide");
+                        bConfirmer.classList.remove("loading");
+                        bAnnuler.classList.remove("loading");
                     }
                 } catch (error){
                     console.error("Erreur de modification", error);
+                    bConfirmer.classList.remove("loading");
+                    bAnnuler.classList.remove("loading");
                 }
             }
             
         } catch (error){
             console.error("Erreur de connexion", error);
+            bConfirmer.classList.remove("loading");
+            bAnnuler.classList.remove("loading");
         }
     
     });
