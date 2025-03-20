@@ -104,6 +104,7 @@ function init(){
                                 "TBMDP": document.getElementById("lMDP")}
         const inputEmail = Ltextboxes["TBEmail"].value;
         const inputMDP = Ltextboxes["TBMDP"].value;
+        console.log(inputMDP);
         const routeAPI = "client/connexion";
         const body = {"email": inputEmail, "mot_de_passe": inputMDP};
         
