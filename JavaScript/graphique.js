@@ -9,12 +9,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function init() {
     let fileName = location.href;
-    if (fileName.includes("graphiques.php")) {
+    if (fileName.includes("graphiques.html")) {
         populateGraphique();
         populateGraphiqueProjet();
         initGraphique();
     }
-    if (fileName.includes("projets.php")) {
+    if (fileName.includes("projets.html")) {
         populateGraphiqueProjet();
     }
 }
@@ -116,7 +116,7 @@ function initGraphique() {
 
     svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
     svg.append("g").call(d3.axisLeft(yScale));
-    
+    /*
     const tooltip = d3.select(".graphique")
         .append("div")
         .style("position", "absolute")
@@ -146,4 +146,5 @@ function initGraphique() {
         .on("mouseout", () => {
             tooltip.style("visibility", "hidden");
         });
+        */
 }
