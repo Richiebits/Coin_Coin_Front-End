@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
     init();
     window.addEventListener("resize", () => {
         initGraphique();
-        });
+    });
 });
 
 function init() {
@@ -19,7 +19,6 @@ function init() {
     }
 }
 
-// Fonction pour changer le titre lorsqu'un projet est cliqué a partir de la page graphique.html
 function populateGraphique() {
     let projets = document.querySelectorAll(".projet");
     let titrePlaceholder = document.querySelector("#titre");
@@ -32,8 +31,6 @@ function populateGraphique() {
     });
 }
 
-
-// Fonction pour changer le titre lorsqu'un projet est cliqué
 function populateGraphiqueProjet() {
     let titrePlaceholder = document.querySelector("#titre");
 
@@ -47,7 +44,6 @@ function populateGraphiqueProjet() {
     highlightSelectedProject();
 }
 
-// Fonction pour mettre en surbrillance le projet correspondant au titre
 function highlightSelectedProject() {
     let titrePlaceholder = document.querySelector("#titre").textContent;
     let projets = document.querySelectorAll(".projet");
@@ -99,7 +95,7 @@ function initGraphique() {
 
     const line = d3.line().x(d => xScale(d.day)).y(d => yScale(d.value)).curve(d3.curveMonotoneX);
     
-    svg.append("path")
+    const graphPath = svg.append("path")
         .datum(data)
         .attr("fill", "none")
         .attr("stroke", "black")
@@ -116,7 +112,7 @@ function initGraphique() {
 
     svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
     svg.append("g").call(d3.axisLeft(yScale));
-    /*
+    
     const tooltip = d3.select(".graphique")
         .append("div")
         .style("position", "absolute")
@@ -127,24 +123,57 @@ function initGraphique() {
         .style("visibility", "hidden")
         .style("font-size", "14px");
 
+    const trackingCircle = svg.append("circle")
+        .attr("r", 8)
+        .attr("fill", "#E8B86D")
+        .style("visibility", "hidden");
+
     svg.append("rect")
         .attr("width", width)
         .attr("height", height)
-        .attr("fill", "transparent")
+        .attr("fill", "transparent");
         
     d3.select(".graphique")    
-    .on("mousemove", function (event) {
-            const [mouseX, mouseY] = d3.pointer(event);
-            const xValue = Math.round(xScale.invert(mouseX));
-            const yValue = Math.round(yScale.invert(mouseY));
+    .on("mousemove", function(event) {
+        const [mouseX, mouseY] = d3.pointer(event, this);
+        const xValue = xScale.invert(mouseX);
+    
+        const path = graphPath.node();
+        const totalLength = path.getTotalLength();
+    
+        let closestPoint = null;
+        let minDiff = Infinity;
+    
 
-            tooltip.style("left", `${mouseX + 10}px`)
-                   .style("top", `${mouseY - 25}px`)
-                   .style("visibility", "visible")
-                   .text(`(${xValue},${yValue})`);
-        })
-        .on("mouseout", () => {
-            tooltip.style("visibility", "hidden");
-        });
-        */
+        for (let i = 0; i < totalLength; i += 1) {
+            const point = path.getPointAtLength(i);
+            const pointXValue = xScale.invert(point.x);
+            const diff = Math.abs(pointXValue - xValue);
+            
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestPoint = point;
+            }
+        }
+    
+        if (closestPoint) {
+
+            trackingCircle
+                .attr("cx", closestPoint.x) 
+                .attr("cy", closestPoint.y)  
+                .style("visibility", "visible");
+
+            
+            tooltip
+                .style("left", `${closestPoint.x - 22}px`) 
+                .style("top", `${closestPoint.y - 35}px`)
+                .style("visibility", "visible")
+                .style("white-space", "nowrap")
+                .text(`(${Math.round(xScale.invert(mouseX))}, ${Math.round(yScale.invert(closestPoint.y))})`);
+        }
+    })
+    .on("mouseout", () => {
+        tooltip.style("visibility", "hidden");
+        trackingCircle.style("visibility", "hidden");
+    });
 }
