@@ -122,7 +122,7 @@ function init(){
                 sessionStorage.setItem("email", inputEmail);
                 alert("Connection réussi!");
                 bLogin.classList.remove("loading");
-                window.location.href = "acceuil.html";
+                window.location.href = "accueil.html";
                 bLogin.classList.remove("loading");
             }
         } catch (error) {

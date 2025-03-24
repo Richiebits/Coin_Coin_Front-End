@@ -21,6 +21,8 @@ async function init(){
                         "TBPrenom": document.getElementById("TBPrenom"),
                         "TBEmail": document.getElementById("TBEmail"),
                         "TBTel": document.getElementById("TBTel"),
+                        "TBNewPassword" : document.getElementById("TBNewPassword"),
+                        "TBConfirmPassword" : document.getElementById("TBConfirmPassword"),
                         "TBPassword": document.getElementById("TBPassword")
                     }
     
@@ -49,30 +51,46 @@ async function init(){
         const parametres = {    "nom": textboxes["TBNom"].value,
                                 "prenom": textboxes["TBPrenom"].value,
                                 "email": textboxes["TBEmail"].value,
-                                "tel":textboxes["TBTel"].value
+                                "tel":textboxes["TBTel"].value,
+                                "newMDP":textboxes["TBNewPassword"].value,
+                                "ConfirmMDP":textboxes["TBConfirmPassword"].value
         }
 
         //Variables pour voir si tout les champs sont complets
         let isComplete = false;
         let tel = true;
         let telValid = true;
+        let confirmPassword = true;
+        let isSafe = true;
+
         //indicateur de champs incomplets
         for (const tb in textboxes){
             textboxes[tb].classList.remove("incomplet")
             isComplete = true;}
 
         for (const tb in textboxes){
-            if (!textboxes[tb].value && tb != "TBTel" && tb != "TBPassword"){
+            if (!textboxes[tb].value && tb != "TBTel" && tb != "TBPassword" && tb != "TBNewPassword" && tb != "TBConfirmPassword"){
                 textboxes[tb].classList.add("incomplet")
-                isComplete = false;}}
+                isComplete = false;
+            }
+        }
+        if ((textboxes["TBNewPassword"].value || textboxes["TBNewPassword"].value) && textboxes["TBNewPassword"].value != textboxes["TBConfirmPassword"].value)
+            confirmPassword = false;
 
+        if (textboxes["TBNewPassword"].value && !textboxes["TBConfirmPassword"].value)
+            textboxes["TBConfirmPassword"].classList.add("incomplet")
+        else {
+            textboxes["TBConfirmPassword"].classList.remove("incomplet")
+        }
+
+        //Vérification du téléphone
         if (!parametres["tel"]){
             tel = false;
             telValid = true;
         } else {
             let telValue = parseInt(parametres["tel"]);
-            
-            if (!isNaN(telValue)) {
+            const regexTel = new RegExp("^[0-9\-]+$")
+            if (!isNaN(telValue) && regexTel.test(parametres["tel"])) {
                 telValid = true;
                 textboxes["TBTel"].classList.remove("incomplet");
             } else {
@@ -80,6 +98,8 @@ async function init(){
                 textboxes["TBTel"].classList.add("incomplet");
             }
         }
+
+        //Vérification de mail
         const regexEmail = new RegExp("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
         if (!regexEmail.test(parametres["email"])){
             isComplete = false;
@@ -87,11 +107,41 @@ async function init(){
         } else {
             textboxes["TBEmail"].classList.remove("incomplet");
         }
+        
+        //Vérification de mot de passe sécuritaire
+        if (textboxes["TBNewPassword"].value != "" || textboxes["TBConfirmPassword"].value != "") {
+            const regexMDP = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
+            if (!regexMDP.test(textboxes["TBNewPassword"])){
+                isSafe = false;
+                textboxes["TBNewPassword"].classList.add("incomplet");
+            } else {
+                textboxes["TBNewPassword"].classList.remove("incomplet");
+            }
+        } else {
+            isSafe = true;
+            textboxes["TBNewPassword"].classList.remove("incomplet");
+            textboxes["TBConfirmPassword"].classList.remove("incomplet");
+        }
+        
 
         //Si tout les champs nécessaire sont complets on cache le form et demande le mot de passe pour confirmer
-        if (isComplete && telValid){
+        if (isComplete && telValid && confirmPassword && isSafe){
             formModif.classList.add("hide");
             formMDP.classList.remove("hide");
+            document.getElementById("errorSection").innerHTML = "";
+        } else {
+            //Messages d'erreurs
+            const sectionErreur = document.getElementById("errorSection");
+            sectionErreur.innerHTML = "<h3>Erreur !<h3> <ul>";
+            if (!isComplete)
+                sectionErreur.innerHTML += "<li>Champ vide : Ajouter des informations dans les champs nécessaires</li>";
+            if (!telValid)
+                sectionErreur.innerHTML += "<li>Téléphone : Le numéro de téléphone est invalide</li>";
+            if (!confirmPassword)
+                sectionErreur.innerHTML += "<li>Mot de passe : Les deux mots de passe ne correspondent pas</li>";
+            if (!isSafe)
+                sectionErreur.innerHTML += "<li>Mot de passe : Le mot de passe doit avoir au moins 8 caractères, avec au moins une lettre majuscule, une lettre minuscule, un chiffre et un signe</li>";
+            sectionErreur.innerHTML += "</ul>"
         }
     })
     
@@ -114,7 +164,7 @@ async function init(){
             bConfirmer.classList.add("loading");
             bAnnuler.classList.add("loading");
             const response = await fetchInfo(route, "POST", {}, bodyConn);
-
+            console.log(emailCompte + " " + MDP + " " + response);
             if (!response || Object.keys(response).length === 0) {
                 console.error("password incorrect", error);
                 bConfirmer.classList.remove("loading");
@@ -127,11 +177,12 @@ async function init(){
                 const newNom = textboxes["TBNom"].value;
                 const newPrenom = textboxes["TBPrenom"].value;
                 const newTel = textboxes["TBTel"].value;
-
+                const newMDP = textboxes["TBNewPassword"].value != "" ? textboxes["TBNewPassword"].value : MDP;
+                console.log(newMDP);
                 //Si le mot de passe est correct on fait une autre requête PUT pour insérer dans la BD les nouvelles informations
                 try {
-                    const bodyMod = {"email": newEmail, "nom":newNom, "prenom":newPrenom, "tel":newTel, "id":idCompte, "mot_de_passe":"Secure123!"}
-                    textboxes["TBPassword"].value = "";
+                    const bodyMod = {"email": newEmail, "nom":newNom, "prenom":newPrenom, "tel":newTel, "id":idCompte, "mot_de_passe":newMDP};
+                    //textboxes["TBPassword"].value = "";
                     const responsePut = await fetchInfo(routePut, "PUT", {}, bodyMod);
                     
                     if (responsePut["success"] == true){
