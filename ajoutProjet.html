@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://fonts.googleapis.com/css?family=Junge' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Galindo' rel='stylesheet'>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/ajoutProjet.css">
+    <script type="module" src="JavaScript/projet.js"></script>
+    <title>Création de projet | Coin Coin</title>
+</head>
+<body>
+    <header>
+        <div id="head">
+            <div id="circle"></div>
+            <img src="ressources/CoinCoinLogo.png" alt="logo" id="logo">
+            <h1>Coin Coin</h1>
+        </div>
+        <div id="nav">
+            <a href="accueil.html" class="pages">Accueil</a>
+            <a href="projets.html" class="pages">Projets</a>
+            <a href="graphiques.html" class="pages">Graphiques</a>
+            <a href="compte.html" class="pages">Compte</a>
+        </div>
+    </header>
+    <main>
+        <div id="sectionPrincipale">
+            <div id="titre">
+                <h3>Ajout d'un projet</h3>
+            </div>
+            <form action="" id="formProjetGauche" class="">
+                <label for="TBNom">Nom du projet :</label>
+                <input type="text" id="TBNom" class="textbox">
+                <label for="TBMontantCible">Montant cible :</label>
+                <input type="text" id="TBMontantCible" class="textbox">
+                <div id="divChoix">
+                    <div>
+                        <input type="radio" id="choixTemps" name="typeProjet">
+                        <div class="tooltip">Selon le temps
+                            <span class="tooltipText">Si vous voulez calculer l'argent à mettre de côté pour vous rendre au montant cible dans un temps donné</span>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="radio" id="choixBudget" name="typeProjet">
+                        <div class="tooltip">Selon le budget
+                            <span class="tooltipText">Si vous voulez calculer le temps que ça vous prendra pour mettre de côté un montant donné selon votre revenu(s) et vos dépenses</span>
+                        </div>
+                    </div>
+                </div>
+
+                <label for="TBDateCible" id="txtDateCible">Date cible :</label>
+                <input type="date" id="TBDateCible" class="textbox">
+            </form>
+            <form action="" id="formProjetDroite">
+                <label for="TBRevenu">Revenu :</label>
+                <input type="password" id="TBRevenu" class="textbox">
+                <label for="TBDepense">Dépense :</label>
+                <input type="password" id="TBDepense" class="textbox">
+            </form>
+            <div id="divBouton">
+                <input type="button" value="Créer" id="btnCreer">
+            </div>
+        </div>
+    </main>
+</body>
+</html>

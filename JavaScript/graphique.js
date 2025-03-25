@@ -15,10 +15,20 @@ function init() {
         initGraphique();
     }
     if (fileName.includes("projets.html")) {
+        initBoutonAjouter();
         populateGraphiqueProjet();
     }
 }
 
+function initBoutonAjouter() {
+    const btnAjouter = document.getElementById("ajoutProjet");
+    btnAjouter.addEventListener(
+        "click",
+        function() {
+            window.location.href = "ajoutProjet.html";
+        }
+    )
+}
 function populateGraphique() {
     let projets = document.querySelectorAll(".projet");
     let titrePlaceholder = document.querySelector("#titre");
