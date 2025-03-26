@@ -1,4 +1,5 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import { fetchInfo } from "./data";
 
 document.addEventListener("DOMContentLoaded", function() {
     init();
@@ -15,20 +16,11 @@ function init() {
         initGraphique();
     }
     if (fileName.includes("projets.html")) {
-        initBoutonAjouter();
         populateGraphiqueProjet();
+        chargerProjects();
     }
 }
 
-function initBoutonAjouter() {
-    const btnAjouter = document.getElementById("ajoutProjet");
-    btnAjouter.addEventListener(
-        "click",
-        function() {
-            window.location.href = "ajoutProjet.html";
-        }
-    )
-}
 function populateGraphique() {
     let projets = document.querySelectorAll(".projet");
     let titrePlaceholder = document.querySelector("#titre");
@@ -42,6 +34,23 @@ function populateGraphique() {
 }
 
 function populateGraphiqueProjet() {
+    let wigglyElements = document.querySelectorAll(".wiggly");
+    let projets = document.querySelectorAll(".projet");
+
+    wigglyElements.forEach(wiggly => {
+        wiggly.addEventListener("click", function() {
+            let isShaking = projets[0].classList.contains("shake"); // Vérifier si ça bouge déjà
+            
+            projets.forEach(projet => {
+                if (isShaking) {
+                    projet.classList.remove("shake"); // Arrête l'animation
+                } else {
+                    projet.classList.add("shake"); // Ajoute l'animation
+                }
+            });
+        });
+    });
+
     let titrePlaceholder = document.querySelector("#titre");
 
     let params = new URLSearchParams(window.location.search);
@@ -187,3 +196,45 @@ function initGraphique() {
         trackingCircle.style("visibility", "hidden");
     });
 }
+/*
+async function chargerProjects() {
+    const clientId = 2; // ID du client à récupérer
+    const projets = await fetchInfo(`projet/client/${clientId}`, "GET");
+
+    if (!projets || projets.length === 0) {
+        console.error("Aucun projet trouvé.");
+        return;
+    }
+
+    const listeProjet = document.getElementById("listeProjet");
+    listeProjet.innerHTML = ""; // Nettoyer la liste avant d'ajouter les projets
+
+    projets.forEach(projet => {
+        const projetLink = document.createElement("a");
+        projetLink.href = `graphiques.html?titre=${encodeURIComponent(projet.nom)}`;
+
+        const projetDiv = document.createElement("div");
+        projetDiv.classList.add("projet");
+
+        // Sélection d'une image par défaut selon le nom (vous pouvez améliorer la logique)
+        const projetImage = document.createElement("img");
+        projetImage.src = getProjectImage(projet.nom);
+        projetImage.alt = projet.nom;
+        projetImage.classList.add("projetImage");
+
+        projetDiv.appendChild(projetImage);
+        projetDiv.appendChild(document.createTextNode(projet.nom));
+
+        projetLink.appendChild(projetDiv);
+        listeProjet.appendChild(projetLink);
+    });
+}
+
+// Fonction pour choisir une image en fonction du projet (ajustez selon vos besoins)
+function getProjectImage(nomProjet) {
+    if (nomProjet.toLowerCase().includes("auto")) return "ressources/auto.png";
+    if (nomProjet.toLowerCase().includes("motoneige")) return "ressources/motoneige.png";
+    if (nomProjet.toLowerCase().includes("cle")) return "ressources/cle_Tag.png";
+    return "ressources/default.png"; // Image par défaut
+}
+    */
