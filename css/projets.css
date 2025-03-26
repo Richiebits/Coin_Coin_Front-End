@@ -4,7 +4,7 @@ body {
 }
 /*************HEADER***************/
 
-/*#head {
+/* #head {
     grid-area: header;
     background-color: FCDE70;
     display: flex;
@@ -127,20 +127,19 @@ a.pages:focus::after {
   transform-origin: center; /* Centre la rotation */
 }
 
-
-
-
 #optionProjet{
   padding-left: 30px;
   padding-right: 30px;
   display:flex;
   flex-wrap: wrap;
   gap: 20px;
-  justify-content: space-evenly;
+  justify-content: center;
+  gap: 435px;
 }
 
 .wiggly {
-  padding: 3em;
+  width: 310px;
+  /* padding: 3em; */
   margin-top: 1em;
   padding-top: 1em;
   padding-bottom: 1em;
