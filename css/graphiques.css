@@ -107,18 +107,17 @@ display: none;
   text-decoration: none; 
 }
 
-.projet a {
-  text-decoration: none; 
+a{
+  text-decoration: none;
 }
 
 .projet.highlight {
-transform:scale(1.2);
-transition: transform 0.3s ease, box-shadow 0.3s ease;
-box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-background-color: #a09d9d;
-border-radius: 5px; 
+  transform: scale(1.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: #a09d9d;
+  border-radius: 5px;
 }
-
 
 .projet:hover {
 background-color: #6F6F6F;
