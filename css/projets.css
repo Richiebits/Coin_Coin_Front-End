@@ -3,44 +3,6 @@ body {
   margin:0; 
 }
 /*************HEADER***************/
-
-/* #head {
-    grid-area: header;
-    background-color: FCDE70;
-    display: flex;
-    margin:0;
-    font-family: 'Junge';
-    color: 45474B;
-    font-size: x-large;
-    align-items: center;
-    height: 9rem;
-}
-
-#sectionAjouter {
-    padding-top: 20px;
-    padding-bottom: 20px;
-    width:91.5%;
-    display: flex;
-    justify-content:space-between;
-    font-family: "Galindo", sans-serif;
-}
-
-#ajoutProjet {
-  padding: 10px;
-  background-color: #F4CE14;
-  border-style:hidden;
-  border-radius: 10px;
-  width: 13%;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-#ajoutProjet:hover{
-  transform: scale(1.1); 
-  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.096); 
-  cursor: pointer;
-*/
-
-
 #head {
   grid-area: header;
   background-color: FCDE70;

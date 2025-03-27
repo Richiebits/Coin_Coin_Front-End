@@ -1,11 +1,22 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import { fetchInfo } from "./data";
+import { fetchInfo } from "./data.js";
 
 document.addEventListener("DOMContentLoaded", function() {
     init();
+
     window.addEventListener("resize", () => {
         initGraphique();
     });
+
+    const buttonSupprActivite = document.getElementById("suprimActivite");
+    if (buttonSupprActivite) {
+        buttonSupprActivite.addEventListener("click", () => {
+            const projets = document.querySelectorAll(".projet");
+            projets.forEach(projet => {
+                projet.classList.toggle("shake"); 
+            });
+        });
+    }
 });
 
 function init() {
@@ -14,9 +25,9 @@ function init() {
         populateGraphique();
         populateGraphiqueProjet();
         initGraphique();
+        chargerProjects();
     }
     if (fileName.includes("projets.html")) {
-        populateGraphiqueProjet();
         chargerProjects();
     }
 }
@@ -24,7 +35,7 @@ function init() {
 function populateGraphique() {
     let projets = document.querySelectorAll(".projet");
     let titrePlaceholder = document.querySelector("#titre");
-    
+
     projets.forEach(projet => {
         projet.addEventListener("click", function() {
             titrePlaceholder.textContent = this.textContent;
@@ -39,34 +50,32 @@ function populateGraphiqueProjet() {
 
     wigglyElements.forEach(wiggly => {
         wiggly.addEventListener("click", function() {
-            let isShaking = projets[0].classList.contains("shake"); // Vérifier si ça bouge déjà
-            
+            let isShaking = projets[0].classList.contains("shake");
+
             projets.forEach(projet => {
                 if (isShaking) {
-                    projet.classList.remove("shake"); // Arrête l'animation
+                    projet.classList.remove("shake");
                 } else {
-                    projet.classList.add("shake"); // Ajoute l'animation
+                    projet.classList.add("shake");
                 }
             });
         });
     });
 
     let titrePlaceholder = document.querySelector("#titre");
-
     let params = new URLSearchParams(window.location.search);
-    
     let title = params.get("titre");
 
     if (title) {
         titrePlaceholder.textContent = title;
-    }    
+    }
     highlightSelectedProject();
 }
 
 function highlightSelectedProject() {
     let titrePlaceholder = document.querySelector("#titre").textContent;
     let projets = document.querySelectorAll(".projet");
-    
+
     projets.forEach(projet => {
         if (projet.textContent === titrePlaceholder) {
             projet.classList.add("highlight");
@@ -82,7 +91,7 @@ function initGraphique() {
         console.error("Element with class 'graphique' not found.");
         return;
     }
-    
+
     d3.select(".graphique svg").remove();
 
     const width = container.clientWidth;
@@ -113,14 +122,14 @@ function initGraphique() {
     const yScale = d3.scaleLinear().domain([0, 100]).range([height, 0]);
 
     const line = d3.line().x(d => xScale(d.day)).y(d => yScale(d.value)).curve(d3.curveMonotoneX);
-    
+
     const graphPath = svg.append("path")
         .datum(data)
         .attr("fill", "none")
         .attr("stroke", "black")
         .attr("stroke-width", 2)
         .attr("d", line);
-    
+
     svg.selectAll("circle")
         .data(data)
         .enter().append("circle")
@@ -131,7 +140,7 @@ function initGraphique() {
 
     svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
     svg.append("g").call(d3.axisLeft(yScale));
-    
+
     const tooltip = d3.select(".graphique")
         .append("div")
         .style("position", "absolute")
@@ -151,72 +160,94 @@ function initGraphique() {
         .attr("width", width)
         .attr("height", height)
         .attr("fill", "transparent");
-        
-    d3.select(".graphique")    
-    .on("mousemove", function(event) {
-        const [mouseX, mouseY] = d3.pointer(event, this);
-        const xValue = xScale.invert(mouseX);
-    
-        const path = graphPath.node();
-        const totalLength = path.getTotalLength();
-    
-        let closestPoint = null;
-        let minDiff = Infinity;
-    
 
-        for (let i = 0; i < totalLength; i += 1) {
-            const point = path.getPointAtLength(i);
-            const pointXValue = xScale.invert(point.x);
-            const diff = Math.abs(pointXValue - xValue);
-            
-            if (diff < minDiff) {
-                minDiff = diff;
-                closestPoint = point;
+    d3.select(".graphique")
+        .on("mousemove", function(event) {
+            const [mouseX, mouseY] = d3.pointer(event, this);
+            const xValue = xScale.invert(mouseX);
+
+            const path = graphPath.node();
+            const totalLength = path.getTotalLength();
+
+            let closestPoint = null;
+            let minDiff = Infinity;
+
+            for (let i = 0; i < totalLength; i += 1) {
+                const point = path.getPointAtLength(i);
+                const pointXValue = xScale.invert(point.x);
+                const diff = Math.abs(pointXValue - xValue);
+
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestPoint = point;
+                }
             }
-        }
-    
-        if (closestPoint) {
 
-            trackingCircle
-                .attr("cx", closestPoint.x) 
-                .attr("cy", closestPoint.y)  
-                .style("visibility", "visible");
+            if (closestPoint) {
+                trackingCircle
+                    .attr("cx", closestPoint.x)
+                    .attr("cy", closestPoint.y)
+                    .style("visibility", "visible");
 
-            
-            tooltip
-                .style("left", `${closestPoint.x - 22}px`) 
-                .style("top", `${closestPoint.y - 35}px`)
-                .style("visibility", "visible")
-                .style("white-space", "nowrap")
-                .text(`(${Math.round(xScale.invert(mouseX))}, ${Math.round(yScale.invert(closestPoint.y))})`);
-        }
-    })
-    .on("mouseout", () => {
-        tooltip.style("visibility", "hidden");
-        trackingCircle.style("visibility", "hidden");
-    });
+                tooltip
+                    .style("left", `${closestPoint.x - 22}px`)
+                    .style("top", `${closestPoint.y - 35}px`)
+                    .style("visibility", "visible")
+                    .style("white-space", "nowrap")
+                    .text(`(${Math.round(xScale.invert(mouseX))}, ${Math.round(yScale.invert(closestPoint.y))})`);
+            }
+        })
+        .on("mouseout", () => {
+            tooltip.style("visibility", "hidden");
+            trackingCircle.style("visibility", "hidden");
+        });
 }
-/*
+
 async function chargerProjects() {
-    const clientId = 2; // ID du client à récupérer
+    const clientId = sessionStorage.getItem("id");
     const projets = await fetchInfo(`projet/client/${clientId}`, "GET");
 
     if (!projets || projets.length === 0) {
         console.error("Aucun projet trouvé.");
         return;
+    } else {
+        console.log(projets);
     }
 
-    const listeProjet = document.getElementById("listeProjet");
-    listeProjet.innerHTML = ""; // Nettoyer la liste avant d'ajouter les projets
+    if (window.location.pathname.includes("graphiques.html")) {
+        const listeProjets = document.getElementById("listeProjets");
+        listeProjets.innerHTML = ""; 
 
     projets.forEach(projet => {
         const projetLink = document.createElement("a");
         projetLink.href = `graphiques.html?titre=${encodeURIComponent(projet.nom)}`;
 
         const projetDiv = document.createElement("div");
-        projetDiv.classList.add("projet");
+        projetDiv.classList.add("projet"); 
 
-        // Sélection d'une image par défaut selon le nom (vous pouvez améliorer la logique)
+        const projetImage = document.createElement("img");
+        //projetImage.src = getProjectImage(projet.nom);
+        //projetImage.alt = projet.nom;
+        projetImage.classList.add("projetImage");
+
+        projetDiv.appendChild(projetImage);
+        projetDiv.appendChild(document.createTextNode(projet.nom));
+
+        projetLink.appendChild(projetDiv);
+
+        listeProjets.appendChild(projetLink);
+    });
+    } else {
+        const listeProjets = document.getElementById("listeProjet");
+        listeProjets.innerHTML = ""; 
+
+    projets.forEach(projet => {
+        const projetLink = document.createElement("a");
+        projetLink.href = `graphiques.html?titre=${encodeURIComponent(projet.nom)}`;
+
+        const projetDiv = document.createElement("div");
+        projetDiv.classList.add("projet"); 
+
         const projetImage = document.createElement("img");
         projetImage.src = getProjectImage(projet.nom);
         projetImage.alt = projet.nom;
@@ -226,15 +257,21 @@ async function chargerProjects() {
         projetDiv.appendChild(document.createTextNode(projet.nom));
 
         projetLink.appendChild(projetDiv);
-        listeProjet.appendChild(projetLink);
+
+        listeProjets.appendChild(projetLink);
     });
+    }
 }
 
-// Fonction pour choisir une image en fonction du projet (ajustez selon vos besoins)
+
 function getProjectImage(nomProjet) {
     if (nomProjet.toLowerCase().includes("auto")) return "ressources/auto.png";
     if (nomProjet.toLowerCase().includes("motoneige")) return "ressources/motoneige.png";
-    if (nomProjet.toLowerCase().includes("cle")) return "ressources/cle_Tag.png";
-    return "ressources/default.png"; // Image par défaut
+    if (nomProjet.toLowerCase().includes("cle_Tag")) return "ressources/cle_Tag.png";
+
+    if(Math.random() < 0.5){
+        return "ressources/dollar.png"; 
+    }else{
+        return "ressources/graphique.png"; 
+    }
 }
-    */
