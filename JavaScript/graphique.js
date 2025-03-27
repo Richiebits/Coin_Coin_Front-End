@@ -22,10 +22,10 @@ document.addEventListener("DOMContentLoaded", function() {
 function init() {
     let fileName = location.href;
     if (fileName.includes("graphiques.html")) {
+        chargerProjects();
         populateGraphique();
         populateGraphiqueProjet();
         initGraphique();
-        chargerProjects();
     }
     if (fileName.includes("projets.html")) {
         chargerProjects();
@@ -39,10 +39,16 @@ function populateGraphique() {
     projets.forEach(projet => {
         projet.addEventListener("click", function() {
             titrePlaceholder.textContent = this.textContent;
+
+            projets.forEach(p => p.classList.remove("active"));
+
+            this.classList.add("active");
+
             highlightSelectedProject();
         });
     });
 }
+
 
 function populateGraphiqueProjet() {
     let wigglyElements = document.querySelectorAll(".wiggly");
@@ -76,14 +82,19 @@ function highlightSelectedProject() {
     let titrePlaceholder = document.querySelector("#titre").textContent;
     let projets = document.querySelectorAll(".projet");
 
+    console.log("Highlight function called. Selected title:", titrePlaceholder);
+    console.log("des projets : ", projets)
     projets.forEach(projet => {
+        console.log("Checking projet:", projet.textContent);
         if (projet.textContent === titrePlaceholder) {
+            console.log("Adding highlight class to:", projet.textContent);
             projet.classList.add("highlight");
         } else {
             projet.classList.remove("highlight");
         }
     });
 }
+
 
 function initGraphique() {
     const container = d3.select(".graphique").node();
@@ -207,60 +218,30 @@ async function chargerProjects() {
     const clientId = sessionStorage.getItem("id");
     const projets = await fetchInfo(`projet/client/${clientId}`, "GET");
 
-    if (!projets || projets.length === 0) {
-        console.error("Aucun projet trouvé.");
-        return;
-    } else {
-        console.log(projets);
-    }
-
-    if (window.location.pathname.includes("graphiques.html")) {
-        const listeProjets = document.getElementById("listeProjets");
-        listeProjets.innerHTML = ""; 
+    const isGraphiquesPage = window.location.pathname.includes("graphiques.html");
+    const listeProjets = document.getElementById(isGraphiquesPage ? "listeProjets" : "listeProjet");
+    listeProjets.innerHTML = "";
 
     projets.forEach(projet => {
         const projetLink = document.createElement("a");
         projetLink.href = `graphiques.html?titre=${encodeURIComponent(projet.nom)}`;
 
         const projetDiv = document.createElement("div");
-        projetDiv.classList.add("projet"); 
+        projetDiv.classList.add("projet");
 
         const projetImage = document.createElement("img");
-        //projetImage.src = getProjectImage(projet.nom);
-        //projetImage.alt = projet.nom;
-        projetImage.classList.add("projetImage");
+        if (!isGraphiquesPage) {
+            projetImage.src = getProjectImage(projet.nom);
+            projetImage.alt = projet.nom;
+            projetImage.classList.add("projetImage");
+            projetDiv.appendChild(projetImage);
+        }
 
-        projetDiv.appendChild(projetImage);
         projetDiv.appendChild(document.createTextNode(projet.nom));
-
         projetLink.appendChild(projetDiv);
-
         listeProjets.appendChild(projetLink);
     });
-    } else {
-        const listeProjets = document.getElementById("listeProjet");
-        listeProjets.innerHTML = ""; 
-
-    projets.forEach(projet => {
-        const projetLink = document.createElement("a");
-        projetLink.href = `graphiques.html?titre=${encodeURIComponent(projet.nom)}`;
-
-        const projetDiv = document.createElement("div");
-        projetDiv.classList.add("projet"); 
-
-        const projetImage = document.createElement("img");
-        projetImage.src = getProjectImage(projet.nom);
-        projetImage.alt = projet.nom;
-        projetImage.classList.add("projetImage");
-
-        projetDiv.appendChild(projetImage);
-        projetDiv.appendChild(document.createTextNode(projet.nom));
-
-        projetLink.appendChild(projetDiv);
-
-        listeProjets.appendChild(projetLink);
-    });
-    }
+    setTimeout(highlightSelectedProject, 10);
 }
 
 
