@@ -185,6 +185,11 @@ input[type=button]:hover {
     margin-left: -100px;
 }
   
+.incomplet {
+    background-color: #c98b89;
+    
+}
+
 .tooltip:hover .tooltipText {
     visibility: visible;
 }

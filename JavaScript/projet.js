@@ -1,3 +1,4 @@
+import { fetchInfo } from './data.js';
 addEventListener("DOMContentLoaded", function() {
     init();
 })
@@ -43,23 +44,53 @@ function switchChoix() {
       }
 }
 
-function creerProjetDate() {
+async function creerProjetDate() {
     const TBNom = document.getElementById('TBNom').value ;
     const TBMontantCible = document.getElementById('TBMontantCible').value;
     const TBDateCible = document.getElementById('TBDateCible').value;
+    const idClient = sessionStorage.getItem("id");
+    const dataProjet = { nom:TBNom, but_epargne:TBMontantCible, client_id:idClient };
+    const dataBudget = { client_id:idClient, depense_total:null, revenus_total:null, date_fin:TBDateCible};
     
-    console.log("Temps coché");
+    //Vérifie nom du projet
+    const projets = await fetchInfo("projet/client/" + idClient,
+                                "GET",
+                              {'Content-Type': 'application/json'});
     
+    const champNom = document.getElementById("TBNom");
+    for(let i = 0; i < projets.length; i++) {
+        if (projets[i]['nom'] === TBNom) {
+            console.log("Nom déjà utilisé");
+            champNom.classList.add("incomplet");
+            return;
+        }
+    }
+    champNom.classList.remove("incomplet");
     if (!TBNom || !TBMontantCible || !TBDateCible) {
         //Doit afficher message d'erreur dans page web : manque info
         console.log("MANQUE INFO");
         return;
     }
+    try {
+        fetchInfo("projet",
+            "POST",
+            {'Content-Type': 'application/json'},
+            dataProjet);
+    
+        //Fait l'ajout du budget
+        fetchInfo("budget",
+            "POST",
+            {'Content-Type': 'application/json'},
+            dataBudget);
+    } catch (error) {
+        console.error("Création de projet et budget échoué : " + error);
+    }
+    //retourne vers page projet ou vers son graphique
+    window.location.href = "graphiques.html?titre="+ encodeURIComponent(TBNom);
 }
 function creerProjetBudget() {
     const TBNom = document.getElementById('TBNom').value ;
     const TBMontantCible = document.getElementById('TBMontantCible').value;
-
     console.log("Budget coché");
 
     //Doit vérifier qu'il y a au moins un revenu d'entré
@@ -68,4 +99,6 @@ function creerProjetBudget() {
         console.log("MANQUE INFO");
         return;
     }
+    
+    
 }
