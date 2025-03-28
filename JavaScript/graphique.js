@@ -7,16 +7,6 @@ document.addEventListener("DOMContentLoaded", function() {
     window.addEventListener("resize", () => {
         initGraphique();
     });
-
-    const buttonSupprActivite = document.getElementById("suprimActivite");
-    if (buttonSupprActivite) {
-        buttonSupprActivite.addEventListener("click", () => {
-            const projets = document.querySelectorAll(".projet");
-            projets.forEach(projet => {
-                projet.classList.toggle("shake"); 
-            });
-        });
-    }
 });
 
 function init() {
@@ -29,6 +19,7 @@ function init() {
     }
     if (fileName.includes("projets.html")) {
         chargerProjects();
+        gererProjets();
     }
 }
 
@@ -44,11 +35,12 @@ function populateGraphique() {
 
             this.classList.add("active");
 
-            highlightSelectedProject();
+            if (window.location.pathname.includes("graphiques.html")) {
+                highlightSelectedProject();
+            }
         });
     });
 }
-
 
 function populateGraphiqueProjet() {
     let wigglyElements = document.querySelectorAll(".wiggly");
@@ -75,25 +67,24 @@ function populateGraphiqueProjet() {
     if (title) {
         titrePlaceholder.textContent = title;
     }
-    highlightSelectedProject();
+    if (window.location.pathname.includes("graphiques.html")) {
+        highlightSelectedProject();
+    }
 }
 
 function highlightSelectedProject() {
     let titrePlaceholder = document.querySelector("#titre").textContent;
     let projets = document.querySelectorAll(".projet");
 
-    console.log("Highlight function called. Selected title:", titrePlaceholder);
-    console.log("des projets : ", projets)
     projets.forEach(projet => {
-        console.log("Checking projet:", projet.textContent);
         if (projet.textContent === titrePlaceholder) {
-            console.log("Adding highlight class to:", projet.textContent);
             projet.classList.add("highlight");
         } else {
             projet.classList.remove("highlight");
         }
     });
 }
+
 
 
 function initGraphique() {
@@ -214,6 +205,8 @@ function initGraphique() {
         });
 }
 
+let deleteMode = false;
+
 async function chargerProjects() {
     const clientId = sessionStorage.getItem("id");
     const projets = await fetchInfo(`projet/client/${clientId}`, "GET");
@@ -223,27 +216,39 @@ async function chargerProjects() {
     listeProjets.innerHTML = "";
 
     projets.forEach(projet => {
-        const projetLink = document.createElement("a");
-        projetLink.href = `graphiques.html?titre=${encodeURIComponent(projet.nom)}`;
-
         const projetDiv = document.createElement("div");
         projetDiv.classList.add("projet");
+        projetDiv.textContent = projet.nom;
 
-        const projetImage = document.createElement("img");
         if (!isGraphiquesPage) {
+            const projetImage = document.createElement("img");
             projetImage.src = getProjectImage(projet.nom);
             projetImage.alt = projet.nom;
             projetImage.classList.add("projetImage");
-            projetDiv.appendChild(projetImage);
+            projetDiv.prepend(projetImage);
         }
 
-        projetDiv.appendChild(document.createTextNode(projet.nom));
-        projetLink.appendChild(projetDiv);
-        listeProjets.appendChild(projetLink);
-    });
-    setTimeout(highlightSelectedProject, 10);
+        if (!deleteMode) {
+            const projetLink = document.createElement("a");
+            projetLink.href = `graphiques.html?titre=${encodeURIComponent(projet.nom)}`;
+            projetLink.appendChild(projetDiv);
+            if (deleteMode) {
+                console.log("QWERTHELPHELP")
+                projetDiv.classList.add("shake");
+            }  
+            listeProjets.appendChild(projetLink);
+        } else {
+            if (deleteMode) {
+                console.log("QWERTHELPHELP")
+                projetDiv.classList.add("shake");
+            }  
+            listeProjets.appendChild(projetDiv);
+        }
+    });  
+    if (isGraphiquesPage) {
+        setTimeout(highlightSelectedProject, 10);
+    }
 }
-
 
 function getProjectImage(nomProjet) {
     if (nomProjet.toLowerCase().includes("auto")) return "ressources/auto.png";
@@ -256,3 +261,57 @@ function getProjectImage(nomProjet) {
         return "ressources/graphique.png"; 
     }
 }
+
+function gererProjets() {
+    const buttonSupprActivite = document.getElementById("suprimActivite");
+    if (buttonSupprActivite) {
+        buttonSupprActivite.addEventListener("click", () => {
+            deleteMode = !deleteMode;
+            chargerProjects();
+            
+            const projets = document.querySelectorAll(".projet");
+            projets.forEach(projet => {
+                projet.classList.toggle("shake", deleteMode);
+            });
+
+            buttonSupprActivite.classList.toggle("deleteMode", deleteMode);
+        });
+    }
+
+    document.addEventListener("click", async function(event) {
+        if (deleteMode) {
+            const projetElement = event.target.closest(".projet");
+            if (!projetElement) return;
+
+            const projetNom = projetElement.textContent.trim();
+            const clientId = sessionStorage.getItem("id");
+            const projets = await fetchInfo(`projet/client/${clientId}`, "GET");
+            const projet = projets.find(p => p.nom === projetNom);
+
+            if (projet) {
+                const confirmDelete = confirm(`Are you sure you want to delete "${projet.nom}"?`);
+                if (confirmDelete) {
+                    await supprimerProjet(projet.id, clientId);
+                    deleteMode = false;
+                    buttonSupprActivite.classList.toggle("deleteMode", deleteMode);
+                    chargerProjects();
+                }
+            } else {
+                alert("Error: Could not find project ID.");
+            }
+        }
+    });
+}
+
+
+async function supprimerProjet(projetId, clientId) {
+    const response = await fetchInfo(`projet/delete/${projetId}/${clientId}`, "DELETE");
+
+    if (response && response.success) {
+        alert("Project deleted successfully!");
+        chargerProjects(); 
+    } else {
+        alert("Error deleting project.");
+    }
+}
+

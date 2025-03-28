@@ -85,8 +85,8 @@ a.pages:focus::after {
 }
 
 .shake {
-  animation: shake-rotate 0.5s infinite ease-in-out; /* Augmenté de 0.3s à 0.5s */
-  transform-origin: center; /* Centre la rotation */
+  animation: shake-rotate 0.5s infinite ease-in-out; 
+  transform-origin: center; 
 }
 
 #optionProjet{
@@ -121,6 +121,11 @@ a.pages:focus::after {
 .wiggly:hover {
   transform: scale(1.1); 
   box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3); 
+}
+
+#suprimActivite.deleteMode {
+  background-color: black;
+  color: #F4CE14;
 }
 
 
