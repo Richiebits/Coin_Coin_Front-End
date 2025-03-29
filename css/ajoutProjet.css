@@ -197,3 +197,33 @@ input[type=button]:hover {
 #formProjetDroite, #TBDateCible, #txtDateCible{
     transition: opacity 0.4s ease-in-out;
 }
+
+.input-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+label {
+    display: block; 
+    margin-bottom: 5px;
+}
+
+
+.textbox {
+    background-color: #D9D9D9;
+    border-radius: 10px;
+    height: 30px;
+    width: 80%;
+    border-width: 0;
+    font-size: medium;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    text-align: start;
+    padding-left: 10px;
+}
+
+select.textbox {
+    width: auto;
+    cursor: pointer;
+}
+

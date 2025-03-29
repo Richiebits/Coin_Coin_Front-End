@@ -91,14 +91,18 @@ async function creerProjetDate() {
 function creerProjetBudget() {
     const TBNom = document.getElementById('TBNom').value ;
     const TBMontantCible = document.getElementById('TBMontantCible').value;
+    const TBDepot = document.getElementById('TBDepot').value ;
+    const TBRetrait = document.getElementById('TBRetrait').value ; 
     console.log("Budget coché");
 
     //Doit vérifier qu'il y a au moins un revenu d'entré
-    if (!TBNom || !TBMontantCible) {
+    if (!TBNom || !TBMontantCible || !TBDepot || !TBRetrait) {
         //Doit afficher message d'erreur dans page web : manque info
         console.log("MANQUE INFO");
         return;
     }
+
+    //a ajouter la fonction qui calcule pour trouver le nb de jour que sa va prendre et la date cible
     
     
 }
