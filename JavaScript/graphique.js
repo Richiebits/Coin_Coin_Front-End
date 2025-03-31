@@ -15,6 +15,8 @@ function init() {
         chargerProjects();
         populateGraphique();
         populateGraphiqueProjet();
+        
+        
         initGraphique();
     }
     if (fileName.includes("projets.html")) {
@@ -85,9 +87,7 @@ function highlightSelectedProject() {
     });
 }
 
-
-
-function initGraphique() {
+async function initGraphique() {
     const container = d3.select(".graphique").node();
     if (!container) {
         console.error("Element with class 'graphique' not found.");
@@ -100,48 +100,83 @@ function initGraphique() {
     const height = 400;
     const margin = { top: 20, right: 0, bottom: 0, left: 0 };
 
-    const data = [
-        { day: 0, value: 0 },
-        { day: 1, value: 5 },
-        { day: 5, value: 30 },
-        { day: 10, value: 60 },
-        { day: 15, value: 40 },
-        { day: 20, value: 42 },
-        { day: 25, value: 55 },
-        { day: 30, value: 85 }
-    ];
+    const params = new URLSearchParams(window.location.search);
+    const projectName = params.get("titre");
+    const clientId = sessionStorage.getItem("id");
 
-    const svg = d3.select(".graphique")
-        .append("svg")
-        .attr("width", "100%")
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`)
-        .style("overflow", "visible")
-        .style("position", "absolute");
+    if (!clientId || !projectName) {
+        console.error("Client ID ou Project Name est pas la");
+        return;
+    }
 
-    const xScale = d3.scaleLinear().domain([0, 31]).range([0, width]);
-    const yScale = d3.scaleLinear().domain([0, 100]).range([height, 0]);
+    try {
+        const projects = await fetchInfo(`projet/client/${clientId}`, "GET");
+        const projetChoisi = projects.find(p => p.nom === projectName);
+        
+        if (!projetChoisi) {
+            console.error("pas trouver projet");
+            return;
+        }
+        
+        const projetId = projetChoisi.id;
+        const budgetData = await fetchInfo(`budget/projet/${projetId}`, "GET");
+        console.log(budgetData[0].date_fin);
+        if (!budgetData || !budgetData[0].date_fin) {
+            console.error("Budget data is missing.");
+            return;
+        }
 
-    const line = d3.line().x(d => xScale(d.day)).y(d => yScale(d.value)).curve(d3.curveMonotoneX);
+        const butEpargne = projetChoisi.but_epargne;
+        const dateFin = new Date(budgetData[0].date_fin);
+        const today = new Date();
+        const jourRestant = Math.max(0, Math.ceil((dateFin - today) / (1000 * 60 * 60 * 24)));
+        
+        const data = [
+            { day: 0, value: 0 },
+            { day: jourRestant / 4, value: butEpargne * 0.25 },
+            { day: jourRestant / 2, value: butEpargne * 0.5 },
+            { day: jourRestant * 0.75, value: butEpargne * 0.75 },
+            { day: jourRestant, value: butEpargne }
+        ];
 
-    const graphPath = svg.append("path")
-        .datum(data)
-        .attr("fill", "none")
-        .attr("stroke", "black")
-        .attr("stroke-width", 2)
-        .attr("d", line);
+        const svg = d3.select(".graphique")
+            .append("svg")
+            .attr("width", "100%")
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`)
+            .style("overflow", "visible")
+            .style("position", "absolute");
 
-    svg.selectAll("circle")
-        .data(data)
-        .enter().append("circle")
-        .attr("cx", d => xScale(d.day))
-        .attr("cy", d => yScale(d.value))
-        .attr("r", 5)
-        .attr("fill", "black");
+        const xScale = d3.scaleLinear().domain([0, jourRestant]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([0, butEpargne]).range([height, 0]);
 
-    svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
-    svg.append("g").call(d3.axisLeft(yScale));
+        const line = d3.line()
+            .x(d => xScale(d.day))
+            .y(d => yScale(d.value))
+            .curve(d3.curveMonotoneX);
+
+        svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            .attr("d", line);
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter().append("circle")
+            .attr("cx", d => xScale(d.day))
+            .attr("cy", d => yScale(d.value))
+            .attr("r", 5)
+            .attr("fill", "black");
+
+        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
+        svg.append("g").call(d3.axisLeft(yScale));
+
+    } catch (error) {
+        console.error("Erreur fetching data:", error);
+    }
 
     const tooltip = d3.select(".graphique")
         .append("div")
