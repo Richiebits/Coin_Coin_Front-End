@@ -1,11 +1,19 @@
 body {
     margin:0;
     background-color: #F5F7F8;
+    display: grid;
+    grid-template-rows: 25% 50% 25%;
+    grid-template-columns: 100%;
+    grid-template-areas: 
+        "header"
+        "main  "
+        "footer";
 }
 header {
     position:fixed;
     top: 0;
     width: 100%;
+    grid-area: header;
 }
 #head {
     background-color: #FCDE70;
@@ -17,7 +25,6 @@ header {
     font-size: x-large;
     align-items: center;
     height: 9rem;
-
 }
 
 #logo {
@@ -65,13 +72,36 @@ a.pages::after {
     border-radius: 10px;
     opacity: 0;
     transition: opacity 300ms, transform 300ms;
-  }
+}
   
-  a.pages:hover::after,
-  a.pages:focus::after {
+a.pages:hover::after,
+a.pages:focus::after {
     opacity: 1;
     transform: translate3d(0, 0.15em, 0);
-  }
+}
+#sectionBtn {
+    display: flex;
+    justify-content: end;
+    width: 70%;
+}
+#btnDeco {
+    background-color: rgba(255, 255, 255, 0);
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 10px;
+    padding: 5px;
+    border-style:hidden;
+}
+#btnDeco:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+main {
+    grid-area: main;
+    font-family: 'Junge';
+    font-weight: bold;
+}
 
 footer {
     background-color: #45474B;
@@ -80,6 +110,7 @@ footer {
     height: 15rem;
     justify-content: space-around;
     align-items: center;
+    grid-area: footer;
 }
 
 footer p a {
