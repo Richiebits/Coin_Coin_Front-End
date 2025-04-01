@@ -41,6 +41,26 @@ header {
     
 }
 
+#errorSection {
+    margin: 2rem;
+    border-radius: 10px;
+    width: 80%;
+    padding: 0px;
+    grid-area: erreur;
+}
+#errorSection:not(:empty) {
+    background-color: rgba(255, 0, 0, 0.466);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    width: 80%;
+}
+
+h3 {
+    margin: 0px;
+    font-weight: bold;
+    display: inline-block;
+}
+
 a.pages {       
     display: block;
     position: relative;
@@ -104,16 +124,22 @@ main {
     margin-top: 2%;
     margin-bottom:3%;
     width: 70%;
+    height: 700px;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     display: grid;
     grid-template-columns: 50% 50%;
-    grid-template-rows: 10% 80% 10%;
+    grid-template-rows: 20% 10% 60% 10%;
     grid-template-areas: 
+        "erreur     erreur    "
         "titre      titre     "
         "formGauche formDroite"
         "divBouton  divBouton ";
+    
+}
+.incomplet {
+    background-color: #c98b89;
     
 }
 #formProjetGauche {

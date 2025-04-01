@@ -21,15 +21,15 @@ header {
 }
 
 #logo {
-    height: 8rem;
+    height: 10rem;
     position: relative;
-    margin: 1rem;
+    margin: 0.1rem;
     z-index: 2;
-}
+  }
 #circle {
     height: 8rem;
     width: 8rem;
-    background-color: #F5F7F8;
+    background-color: #ffffff;
     border-radius: 50%;
     position: absolute;
     z-index: 1;
