@@ -14,6 +14,9 @@ async function init() {
         else {
             //Afficher erreur
             console.log("Rien de coché")
+            const sectionErreur = document.getElementById("errorSection");
+            sectionErreur.innerHTML = "<h3>Erreur !<h3> <ul>";
+            sectionErreur.innerHTML += "<li>Option invalide : Veuillez sélectionner une option de projet</li>";
         }
     });
 }
@@ -50,7 +53,8 @@ async function creerProjetDate() {
     const TBDateCible = document.getElementById('TBDateCible').value;
     const idClient = sessionStorage.getItem("id");
     const dataProjet = { nomProjet:TBNom, but_epargne:TBMontantCible, client_id:idClient, retraits_total:null, depots_total:null, date_fin:TBDateCible };
-    
+    let isNomUnique = true;
+    let isComplet = true;
     //Vérifie nom du projet
     const projets = await fetchInfo("projet/client/" + idClient,
                                 "GET",
@@ -59,22 +63,34 @@ async function creerProjetDate() {
     const champNom = document.getElementById("TBNom");
     for(let i = 0; i < projets.length; i++) {
         if (projets[i]['nom'] === TBNom) {
-            console.log("Nom déjà utilisé");
-            champNom.classList.add("incomplet");
-            return;
+            isNomUnique = false;
         }
     }
-    champNom.classList.remove("incomplet");
     if (!TBNom || !TBMontantCible || !TBDateCible) {
-        //Doit afficher message d'erreur dans page web : manque info
-        console.log("MANQUE INFO");
-        return;
+        isComplet = false;
     }
+    const sectionErreur = document.getElementById("errorSection");
+    if (!isComplet || !isNomUnique) {
+        sectionErreur.innerHTML = "<h3>Erreur !<h3> <ul>";
+        if (!isComplet) 
+            sectionErreur.innerHTML += "<li>Champ vide : Ajouter des informations dans les champs nécessaires</li>";
+        if (!isNomUnique) {
+            sectionErreur.innerHTML += "<li>Nom du projet: Vous avez déjà un projet portant ce nom</li>";    
+            champNom.classList.add("incomplet");
+        }
+        return;
+    } else {
+        sectionErreur.innerHTML = "";
+        champNom.classList.remove("incomplet");
+    }
+    
     try {
+        console.log("RENTRÉ DANS LE TRY")
         fetchInfo("projet",
             "POST",
             {'Content-Type': 'application/json'},
             dataProjet);
+        console.log("FAIT LE FETCH SANS PROBLEME")
     } catch (error) {
         console.error("Création de projet et budget échoué : " + error);
     }
@@ -82,7 +98,7 @@ async function creerProjetDate() {
     window.location.href = "graphiques.html?titre="+ encodeURIComponent(TBNom);
 }
 
-function creerProjetBudget() {
+async function creerProjetBudget() {
     //Récupération des infos 
     const TBNom = document.getElementById('TBNom').value ;
     const TBMontantCible = document.getElementById('TBMontantCible').value;
@@ -104,11 +120,35 @@ function creerProjetBudget() {
                          nomDepot:null, montantDepot:TBDepot, depot_recurrence:freqDepot,
                          nomRetrait:null, montantRetrait:TBRetrait, retrait_recurrence:freqRetrait};
 
+    let isComplet = true;
+    let isNomUnique = true;
+    const projets = await fetchInfo("projet/client/" + idClient,
+                                     "GET",
+                                    {'Content-Type': 'application/json'});
+
+    const champNom = document.getElementById("TBNom");
+    for(let i = 0; i < projets.length; i++) {
+        if (projets[i]['nom'] === TBNom) {
+            isNomUnique = false;
+        }
+    }
     //Doit vérifier qu'il y a au moins un revenu d'entré
     if (!TBNom || !TBMontantCible || !TBDepot || !TBRetrait) {
-        //Doit afficher message d'erreur dans page web : manque info
-        console.log("MANQUE INFO");
+        isComplet = false;
+    }
+    const sectionErreur = document.getElementById("errorSection");
+    if (!isComplet || !isNomUnique) {
+        sectionErreur.innerHTML = "<h3>Erreur !<h3> <ul>";
+        if (!isComplet) 
+            sectionErreur.innerHTML += "<li>Champ vide : Ajouter des informations dans les champs nécessaires</li>";
+        if (!isNomUnique) {
+            sectionErreur.innerHTML += "<li>Nom du projet: Vous avez déjà un projet portant ce nom</li>";    
+            champNom.classList.add("incomplet");
+        }
         return;
+    } else {
+        sectionErreur.innerHTML = "";
+        champNom.classList.remove("incomplet");
     }
     
     try {
