@@ -121,15 +121,16 @@ async function initGraphique() {
         const projetId = projetChoisi.id;
         const budgetData = await fetchInfo(`budget/projet/${projetId}`, "GET");
         console.log(budgetData[0].date_fin);
-        if (!budgetData || !budgetData[0].date_fin) {
+        if (!budgetData || !budgetData[0].date_fin || !budgetData[0].date_debut) {
             console.error("Budget data is missing.");
             return;
         }
 
         const butEpargne = projetChoisi.but_epargne;
         const dateFin = new Date(budgetData[0].date_fin);
-        const today = new Date();
-        const jourRestant = Math.max(0, Math.ceil((dateFin - today) / (1000 * 60 * 60 * 24)));
+        const dateDebut = new Date(budgetData[0].date_debut);
+        const aujourdhui = new Date();
+        const jourRestant = Math.max(0, Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24)));
         
         const data = [
             { day: 0, value: 0 },
@@ -151,6 +152,31 @@ async function initGraphique() {
         const xScale = d3.scaleLinear().domain([0, jourRestant]).range([0, width]);
         const yScale = d3.scaleLinear().domain([0, butEpargne]).range([height, 0]);
 
+        const xAxis = d3.axisBottom(xScale).ticks(6);
+        const yAxis = d3.axisLeft(yScale);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(xAxis);
+
+        svg.append("g")
+            .call(yAxis);
+
+        svg.append("text")
+        .attr("x", width)  
+        .attr("y", height + 35)  
+        .attr("text-anchor", "end") 
+        .style("font-size", "14px")
+        .text("Days");
+
+        svg.append("text")
+        .attr("x", -45)
+        .attr("y", 5)  
+        .attr("text-anchor", "end") 
+        .style("font-size", "14px")
+        .text("$");
+
+
         const line = d3.line()
             .x(d => xScale(d.day))
             .y(d => yScale(d.value))
@@ -163,6 +189,14 @@ async function initGraphique() {
             .attr("stroke-width", 2)
             .attr("d", line);
 
+        const graphPath = svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            .attr("d", line);
+            
+
         svg.selectAll("circle")
             .data(data)
             .enter().append("circle")
@@ -173,10 +207,6 @@ async function initGraphique() {
 
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
         svg.append("g").call(d3.axisLeft(yScale));
-
-    } catch (error) {
-        console.error("Erreur fetching data:", error);
-    }
 
     const tooltip = d3.select(".graphique")
         .append("div")
@@ -238,6 +268,9 @@ async function initGraphique() {
             tooltip.style("visibility", "hidden");
             trackingCircle.style("visibility", "hidden");
         });
+    } catch (error) {
+        console.error("Erreur fetching data:", error);
+    }
 }
 
 let deleteMode = false;
