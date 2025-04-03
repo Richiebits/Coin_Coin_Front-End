@@ -189,6 +189,15 @@ if (depenses) {
 
         console.log(transactions);
         console.log(`Jour actuel: ${jourAjourdhui}`);
+
+        cumulativeValue = 0;
+        let maxYValue = butEpargne;
+
+        transactions = transactions.sort((a, b) => a.day - b.day).map(transaction => {
+            cumulativeValue += transaction.value;
+            if (cumulativeValue > maxYValue) maxYValue = cumulativeValue;
+            return { day: transaction.day, value: cumulativeValue };
+        });
         
         const data = [
             { day: 0, value: 0 },
@@ -201,11 +210,10 @@ if (depenses) {
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`)
-            .style("overflow", "visible")
             .style("position", "absolute");
 
         const xScale = d3.scaleLinear().domain([0, jourRestant]).range([0, width]);
-        const yScale = d3.scaleLinear().domain([0, butEpargne]).range([height, 0]);
+        const yScale = d3.scaleLinear().domain([0, maxYValue]).range([height, 0]);
 
         const xAxis = d3.axisBottom(xScale).ticks(6);
         const yAxis = d3.axisLeft(yScale);
@@ -250,6 +258,24 @@ if (depenses) {
             .attr("stroke", "black")
             .attr("stroke-width", 2)
             .attr("d", line);
+
+        svg.append("line")
+            .attr("x1", 0)
+            .attr("y1", yScale(butEpargne))
+            .attr("x2", width)
+            .attr("y2", yScale(butEpargne))
+            .attr("stroke", "red")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "5,5");
+
+            svg.append("text")
+            .attr("x", width - 10)
+            .attr("y", yScale(butEpargne) - 5)
+            .attr("text-anchor", "end")
+            .attr("fill", "red")
+            .style("font-weight", "bold")
+            .style("font-size", "15px")
+            .text("But D'épargne");
             
 
         svg.selectAll("circle")
