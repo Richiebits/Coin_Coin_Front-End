@@ -131,15 +131,33 @@ async function initGraphique() {
         const dateDebut = new Date(budgetData[0].date_debut);
         const aujourdhui = new Date();
         const jourRestant = Math.max(0, Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24)));
+        const jourAjourdhui = Math.max(0, Math.ceil((aujourdhui - dateDebut) / (1000 * 60 * 60 * 24)));
+
+        const depenses = await fetchInfo(`depense/budget/${budgetData[0].id}`, "GET");
+        const revenus = await fetchInfo(`revenu/budget/${budgetData[0].id}`, "GET");
+        
+        let transactions = [];
+        if (revenus) {
+            transactions = transactions.concat(revenus.map(r => ({ day: Math.ceil((new Date(r.date) - dateDebut) / (1000 * 60 * 60 * 24)), value: r.montant })));
+        }
+        if (depenses) {
+            transactions = transactions.concat(depenses.map(d => ({ day: Math.ceil((new Date(d.date) - dateDebut) / (1000 * 60 * 60 * 24)), value: -d.montant })));
+        }
+        
+        transactions.sort((a, b) => a.day - b.day);
+        
+        let cumulativeValue = 0;
+        transactions = transactions.map(t => {
+            cumulativeValue += t.value;
+            return { day: t.day, value: cumulativeValue };
+        });
         
         const data = [
             { day: 0, value: 0 },
-            { day: jourRestant / 4, value: butEpargne * 0.25 },
-            { day: jourRestant / 2, value: butEpargne * 0.5 },
-            { day: jourRestant * 0.75, value: butEpargne * 0.75 },
-            { day: jourRestant, value: butEpargne }
+            ...transactions.filter(t => !isNaN(t.day) && !isNaN(t.value)), 
+            { day: isNaN(jourAjourdhui) ? 0 : jourAjourdhui, value: isNaN(butEpargne) ? 0 : butEpargne }
         ];
-
+        
         const svg = d3.select(".graphique")
             .append("svg")
             .attr("width", "100%")
