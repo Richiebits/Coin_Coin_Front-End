@@ -135,27 +135,64 @@ async function initGraphique() {
 
         const depenses = await fetchInfo(`depense/budget/${budgetData[0].id}`, "GET");
         const revenus = await fetchInfo(`revenu/budget/${budgetData[0].id}`, "GET");
-        
-        let transactions = [];
-        if (revenus) {
-            transactions = transactions.concat(revenus.map(r => ({ day: Math.ceil((new Date(r.date) - dateDebut) / (1000 * 60 * 60 * 24)), value: r.montant })));
+
+let transactions = [];
+
+if (revenus) {
+    revenus.forEach(revenu => {
+        if (revenu.depot_recurrence) {
+            console.log(`Revenu récurrent: ${revenu.montant}, fréquence: ${revenu.depot_recurrence}`);
+            
+            for (let jour = revenu.depot_recurrence; jour <= jourAjourdhui; jour += revenu.depot_recurrence) {
+                transactions.push({
+                    day: jour,
+                    value: revenu.montant
+                });
+            }
         }
-        if (depenses) {
-            transactions = transactions.concat(depenses.map(d => ({ day: Math.ceil((new Date(d.date) - dateDebut) / (1000 * 60 * 60 * 24)), value: -d.montant })));
+    });
+}
+
+if (depenses) {
+    depenses.forEach(depense => {
+        if (depense.retrait_recurrence) {
+            console.log(`Dépense récurrente: ${depense.montant}, fréquence: ${depense.retrait_recurrence}`);
+            
+            for (let jour = depense.retrait_recurrence; jour <= jourAjourdhui; jour += depense.retrait_recurrence) {
+                transactions.push({
+                    day: jour,
+                    value: -depense.montant
+                });
+            }
         }
-        
-        transactions.sort((a, b) => a.day - b.day);
-        
+    });
+}
+
+        let mergedTransactions = transactions.reduce((acc, transaction) => {
+            if (!acc[transaction.day]) {
+                acc[transaction.day] = { day: transaction.day, value: 0 };
+            }
+            acc[transaction.day].value += transaction.value;
+            return acc;
+        }, {});
+
+        transactions = Object.values(mergedTransactions).sort((a, b) => a.day - b.day);
+
         let cumulativeValue = 0;
-        transactions = transactions.map(t => {
-            cumulativeValue += t.value;
-            return { day: t.day, value: cumulativeValue };
+        transactions = transactions.map(transaction => {
+            cumulativeValue += transaction.value;
+            return {
+                day: transaction.day,
+                value: cumulativeValue
+            };
         });
+
+        console.log(transactions);
+        console.log(`Jour actuel: ${jourAjourdhui}`);
         
         const data = [
             { day: 0, value: 0 },
             ...transactions.filter(t => !isNaN(t.day) && !isNaN(t.value)), 
-            { day: isNaN(jourAjourdhui) ? 0 : jourAjourdhui, value: isNaN(butEpargne) ? 0 : butEpargne }
         ];
         
         const svg = d3.select(".graphique")
@@ -246,46 +283,49 @@ async function initGraphique() {
         .attr("height", height)
         .attr("fill", "transparent");
 
-    d3.select(".graphique")
+        d3.select(".graphique")
         .on("mousemove", function(event) {
             const [mouseX, mouseY] = d3.pointer(event, this);
-            const xValue = xScale.invert(mouseX);
-
+            const maxX = xScale(data[data.length - 1].day);
+            const clampedMouseX = Math.min(mouseX, maxX); 
+            const xValue = xScale.invert(clampedMouseX);
+    
             const path = graphPath.node();
             const totalLength = path.getTotalLength();
-
+    
             let closestPoint = null;
             let minDiff = Infinity;
-
+    
             for (let i = 0; i < totalLength; i += 1) {
                 const point = path.getPointAtLength(i);
                 const pointXValue = xScale.invert(point.x);
                 const diff = Math.abs(pointXValue - xValue);
-
+    
                 if (diff < minDiff) {
                     minDiff = diff;
                     closestPoint = point;
                 }
             }
-
+    
             if (closestPoint) {
                 trackingCircle
                     .attr("cx", closestPoint.x)
                     .attr("cy", closestPoint.y)
                     .style("visibility", "visible");
-
+    
                 tooltip
                     .style("left", `${closestPoint.x - 22}px`)
                     .style("top", `${closestPoint.y - 35}px`)
                     .style("visibility", "visible")
                     .style("white-space", "nowrap")
-                    .text(`(${Math.round(xScale.invert(mouseX))}, ${Math.round(yScale.invert(closestPoint.y))})`);
+                    .text(`(${Math.round(xScale.invert(clampedMouseX))}, ${Math.round(yScale.invert(closestPoint.y))})`);
             }
         })
         .on("mouseout", () => {
             tooltip.style("visibility", "hidden");
             trackingCircle.style("visibility", "hidden");
         });
+    
     } catch (error) {
         console.error("Erreur fetching data:", error);
     }
