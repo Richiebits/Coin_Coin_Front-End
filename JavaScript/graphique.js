@@ -15,8 +15,6 @@ function init() {
         chargerProjects();
         populateGraphique();
         populateGraphiqueProjet();
-        
-        
         initGraphique();
     }
     if (fileName.includes("projets.html")) {
@@ -129,44 +127,51 @@ async function initGraphique() {
         const butEpargne = projetChoisi.but_epargne;
         const dateFin = new Date(budgetData[0].date_fin);
         const dateDebut = new Date(budgetData[0].date_debut);
-        const aujourdhui = new Date();
+        const aujourdhui = new Date(Date.now());
         const jourRestant = Math.max(0, Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24)));
         const jourAjourdhui = Math.max(0, Math.ceil((aujourdhui - dateDebut) / (1000 * 60 * 60 * 24)));
+
+        //AFFICHER INFO DU PROJET ICI
+        const section = document.getElementById("description");
+        section.innerHTML = "<div>Date actuelle : " + aujourdhui.getDate() + "/" + aujourdhui.getMonth() + "/" + aujourdhui.getFullYear() + "</div>" +
+                            "<div>Montant cible : " + butEpargne +"$</div>" + 
+                            "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>" + 
+                            "<div>Allo</div>"
 
         const depenses = await fetchInfo(`depense/budget/${budgetData[0].id}`, "GET");
         const revenus = await fetchInfo(`revenu/budget/${budgetData[0].id}`, "GET");
 
-let transactions = [];
+        let transactions = [];
 
-if (revenus) {
-    revenus.forEach(revenu => {
-        if (revenu.depot_recurrence) {
-            console.log(`Revenu récurrent: ${revenu.montant}, fréquence: ${revenu.depot_recurrence}`);
+        if (revenus) {
+            revenus.forEach(revenu => {
+                if (revenu.depot_recurrence) {
+                    console.log(`Revenu récurrent: ${revenu.montant}, fréquence: ${revenu.depot_recurrence}`);
             
-            for (let jour = revenu.depot_recurrence; jour <= jourAjourdhui; jour += revenu.depot_recurrence) {
-                transactions.push({
-                    day: jour,
-                    value: revenu.montant
-                });
-            }
+                    for (let jour = revenu.depot_recurrence; jour <= jourAjourdhui; jour += revenu.depot_recurrence) {
+                        transactions.push({
+                            day: jour,
+                            value: revenu.montant
+                        });
+                    }
+                }
+            });
         }
-    });
-}
 
-if (depenses) {
-    depenses.forEach(depense => {
-        if (depense.retrait_recurrence) {
-            console.log(`Dépense récurrente: ${depense.montant}, fréquence: ${depense.retrait_recurrence}`);
+        if (depenses) {
+            depenses.forEach(depense => {
+                if (depense.retrait_recurrence) {
+                    console.log(`Dépense récurrente: ${depense.montant}, fréquence: ${depense.retrait_recurrence}`);
             
-            for (let jour = depense.retrait_recurrence; jour <= jourAjourdhui; jour += depense.retrait_recurrence) {
-                transactions.push({
-                    day: jour,
-                    value: -depense.montant
-                });
-            }
+                    for (let jour = depense.retrait_recurrence; jour <= jourAjourdhui; jour += depense.retrait_recurrence) {
+                        transactions.push({
+                            day: jour,
+                            value: -depense.montant
+                        });
+                    }
+                }
+            });
         }
-    });
-}
 
         let mergedTransactions = transactions.reduce((acc, transaction) => {
             if (!acc[transaction.day]) {
