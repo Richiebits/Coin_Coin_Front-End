@@ -15,8 +15,6 @@ function init() {
         chargerProjects();
         populateGraphique();
         populateGraphiqueProjet();
-        
-        
         initGraphique();
     }
     if (fileName.includes("projets.html")) {
@@ -121,35 +119,158 @@ async function initGraphique() {
         const projetId = projetChoisi.id;
         const budgetData = await fetchInfo(`budget/projet/${projetId}`, "GET");
         console.log(budgetData[0].date_fin);
-        if (!budgetData || !budgetData[0].date_fin) {
-            console.error("Budget data is missing.");
+        if (!budgetData || !budgetData[0].date_debut) {
+            console.error("Budget data existe pas");
             return;
         }
-
+        
         const butEpargne = projetChoisi.but_epargne;
-        const dateFin = new Date(budgetData[0].date_fin);
-        const today = new Date();
-        const jourRestant = Math.max(0, Math.ceil((dateFin - today) / (1000 * 60 * 60 * 24)));
+        const dateDebut = new Date(budgetData[0].date_debut);
+        let dateFin = budgetData[0].date_fin ? new Date(budgetData[0].date_fin) : null;
+        
+        const depenses = await fetchInfo(`depense/budget/${budgetData[0].id}`, "GET");
+        const revenus = await fetchInfo(`revenu/budget/${budgetData[0].id}`, "GET");
+        
+        if (!dateFin) {
+            let gainQuotidien = 0;
+        
+            revenus.forEach(revenu => {
+                if (revenu.depot_recurrence && revenu.montant) {
+                    gainQuotidien += revenu.montant / revenu.depot_recurrence;
+                }
+            });
+        
+            depenses.forEach(depense => {
+                if (depense.retrait_recurrence && depense.montant) {
+                    gainQuotidien -= depense.montant / depense.retrait_recurrence;
+                }
+            });
+        
+            if (gainQuotidien <= 0) {
+                console.error("Gain quotidien insuffisant pour atteindre l'objectif.");
+                return;
+            }
+        
+            const joursNecessaires = Math.ceil(butEpargne / gainQuotidien);
+            dateFin = new Date(dateDebut.getTime() + joursNecessaires * 24 * 60 * 60 * 1000);
+        } else {
+            const dateFin = new Date(budgetData[0].date_fin);
+        }
+        
+        const aujourdhui = new Date(Date.now());
+        const jourRestant = Math.max(0, Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24)));
+        const jourAjourdhui = Math.max(0, Math.ceil((aujourdhui - dateDebut) / (1000 * 60 * 60 * 24)));
+
+        //AFFICHER INFO DU PROJET ICI
+        const section = document.getElementById("description");
+        section.innerHTML = "<div>Date actuelle : " + aujourdhui.getDate() + "/" + aujourdhui.getMonth() + "/" + aujourdhui.getFullYear() + "</div>" +
+                            "<div>Montant cible : " + butEpargne +"$</div>" + 
+                            "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>" + 
+                            "<div>Allo</div>"
+
+        let transactions = [];
+
+        if (revenus) {
+            revenus.forEach(revenu => {
+                if (revenu.depot_recurrence) {
+                    console.log(`Revenu récurrent: ${revenu.montant}, fréquence: ${revenu.depot_recurrence}`);
+            
+                    for (let jour = revenu.depot_recurrence; jour <= jourAjourdhui; jour += revenu.depot_recurrence) {
+                        transactions.push({
+                            day: jour,
+                            value: revenu.montant
+                        });
+                    }
+                }
+            });
+        }
+
+        if (depenses) {
+            depenses.forEach(depense => {
+                if (depense.retrait_recurrence) {
+                    console.log(`Dépense récurrente: ${depense.montant}, fréquence: ${depense.retrait_recurrence}`);
+            
+                    for (let jour = depense.retrait_recurrence; jour <= jourAjourdhui; jour += depense.retrait_recurrence) {
+                        transactions.push({
+                            day: jour,
+                            value: -depense.montant
+                        });
+                    }
+                }
+            });
+        }
+
+        let mergedTransactions = transactions.reduce((acc, transaction) => {
+            if (!acc[transaction.day]) {
+                acc[transaction.day] = { day: transaction.day, value: 0 };
+            }
+            acc[transaction.day].value += transaction.value;
+            return acc;
+        }, {});
+
+        transactions = Object.values(mergedTransactions).sort((a, b) => a.day - b.day);
+
+        let cumulativeValue = 0;
+        transactions = transactions.map(transaction => {
+            cumulativeValue += transaction.value;
+            return {
+                day: transaction.day,
+                value: cumulativeValue
+            };
+        });
+
+        console.log(transactions);
+        console.log(`Jour actuel: ${jourAjourdhui}`);
+
+        cumulativeValue = 0;
+        let maxYValue = butEpargne;
+
+        transactions = transactions.sort((a, b) => a.day - b.day).map(transaction => {
+            cumulativeValue += transaction.value;
+            if (cumulativeValue > maxYValue) maxYValue = cumulativeValue;
+            return { day: transaction.day, value: cumulativeValue };
+        });
         
         const data = [
             { day: 0, value: 0 },
-            { day: jourRestant / 4, value: butEpargne * 0.25 },
-            { day: jourRestant / 2, value: butEpargne * 0.5 },
-            { day: jourRestant * 0.75, value: butEpargne * 0.75 },
-            { day: jourRestant, value: butEpargne }
+            ...transactions.filter(t => !isNaN(t.day) && !isNaN(t.value)), 
         ];
-
+        
         const svg = d3.select(".graphique")
             .append("svg")
             .attr("width", "100%")
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`)
-            .style("overflow", "visible")
             .style("position", "absolute");
 
         const xScale = d3.scaleLinear().domain([0, jourRestant]).range([0, width]);
-        const yScale = d3.scaleLinear().domain([0, butEpargne]).range([height, 0]);
+        const yScale = d3.scaleLinear().domain([0, maxYValue]).range([height, 0]);
+
+        const xAxis = d3.axisBottom(xScale).ticks(6);
+        const yAxis = d3.axisLeft(yScale);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(xAxis);
+
+        svg.append("g")
+            .call(yAxis);
+
+        svg.append("text")
+        .attr("x", width)  
+        .attr("y", height + 35)  
+        .attr("text-anchor", "end") 
+        .style("font-size", "14px")
+        .text("(Jour)");
+
+        svg.append("text")
+        .attr("x", -45)
+        .attr("y", 5)  
+        .attr("text-anchor", "end") 
+        .style("font-size", "14px")
+        .text("($)");
+
 
         const line = d3.line()
             .x(d => xScale(d.day))
@@ -163,6 +284,32 @@ async function initGraphique() {
             .attr("stroke-width", 2)
             .attr("d", line);
 
+        const graphPath = svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            .attr("d", line);
+
+        svg.append("line")
+            .attr("x1", 0)
+            .attr("y1", yScale(butEpargne))
+            .attr("x2", width)
+            .attr("y2", yScale(butEpargne))
+            .attr("stroke", "red")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "5,5");
+
+            svg.append("text")
+            .attr("x", width - 10)
+            .attr("y", yScale(butEpargne) - 5)
+            .attr("text-anchor", "end")
+            .attr("fill", "red")
+            .style("font-weight", "bold")
+            .style("font-size", "15px")
+            .text("But D'épargne");
+            
+
         svg.selectAll("circle")
             .data(data)
             .enter().append("circle")
@@ -173,10 +320,6 @@ async function initGraphique() {
 
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
         svg.append("g").call(d3.axisLeft(yScale));
-
-    } catch (error) {
-        console.error("Erreur fetching data:", error);
-    }
 
     const tooltip = d3.select(".graphique")
         .append("div")
@@ -198,46 +341,52 @@ async function initGraphique() {
         .attr("height", height)
         .attr("fill", "transparent");
 
-    d3.select(".graphique")
+        d3.select(".graphique")
         .on("mousemove", function(event) {
             const [mouseX, mouseY] = d3.pointer(event, this);
-            const xValue = xScale.invert(mouseX);
-
+            const maxX = xScale(data[data.length - 1].day);
+            const clampedMouseX = Math.min(mouseX, maxX); 
+            const xValue = xScale.invert(clampedMouseX);
+    
             const path = graphPath.node();
             const totalLength = path.getTotalLength();
-
+    
             let closestPoint = null;
             let minDiff = Infinity;
-
+    
             for (let i = 0; i < totalLength; i += 1) {
                 const point = path.getPointAtLength(i);
                 const pointXValue = xScale.invert(point.x);
                 const diff = Math.abs(pointXValue - xValue);
-
+    
                 if (diff < minDiff) {
                     minDiff = diff;
                     closestPoint = point;
                 }
             }
-
+    
             if (closestPoint) {
                 trackingCircle
                     .attr("cx", closestPoint.x)
                     .attr("cy", closestPoint.y)
                     .style("visibility", "visible");
-
+    
                 tooltip
                     .style("left", `${closestPoint.x - 22}px`)
                     .style("top", `${closestPoint.y - 35}px`)
                     .style("visibility", "visible")
                     .style("white-space", "nowrap")
-                    .text(`(${Math.round(xScale.invert(mouseX))}, ${Math.round(yScale.invert(closestPoint.y))})`);
+                    .text(`(${Math.round(xScale.invert(clampedMouseX))}, ${Math.round(yScale.invert(closestPoint.y))})`);
             }
         })
         .on("mouseout", () => {
             tooltip.style("visibility", "hidden");
             trackingCircle.style("visibility", "hidden");
         });
+    
+    } catch (error) {
+        console.error("Erreur fetching data:", error);
+    }
 }
 
 let deleteMode = false;
@@ -324,7 +473,7 @@ function gererProjets() {
             const projet = projets.find(p => p.nom === projetNom);
 
             if (projet) {
-                const confirmDelete = confirm(`Are you sure you want to delete "${projet.nom}"?`);
+                const confirmDelete = confirm(`Êtes-vous sûr de vouloir supprimer "${projet.nom}"?`);
                 if (confirmDelete) {
                     await supprimerProjet(projet.id, clientId);
                     deleteMode = false;
@@ -332,7 +481,7 @@ function gererProjets() {
                     chargerProjects();
                 }
             } else {
-                alert("Error: Could not find project ID.");
+                alert("Erreur: pas trouver projet id");
             }
         }
     });
@@ -343,10 +492,10 @@ async function supprimerProjet(projetId, clientId) {
     const response = await fetchInfo(`projet/delete/${projetId}/${clientId}`, "DELETE");
 
     if (response && response.success) {
-        alert("Project deleted successfully!");
+        alert("Projet supprimé avec succes!");
         chargerProjects(); 
     } else {
-        alert("Error deleting project.");
+        alert("Erreur lors de la supression de projet!");
     }
 }
 
