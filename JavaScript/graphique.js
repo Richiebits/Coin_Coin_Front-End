@@ -119,14 +119,44 @@ async function initGraphique() {
         const projetId = projetChoisi.id;
         const budgetData = await fetchInfo(`budget/projet/${projetId}`, "GET");
         console.log(budgetData[0].date_fin);
-        if (!budgetData || !budgetData[0].date_fin || !budgetData[0].date_debut) {
-            console.error("Budget data is missing.");
+        if (!budgetData || !budgetData[0].date_debut) {
+            console.error("Budget data existe pas");
             return;
         }
-
+        
         const butEpargne = projetChoisi.but_epargne;
-        const dateFin = new Date(budgetData[0].date_fin);
         const dateDebut = new Date(budgetData[0].date_debut);
+        let dateFin = budgetData[0].date_fin ? new Date(budgetData[0].date_fin) : null;
+        
+        const depenses = await fetchInfo(`depense/budget/${budgetData[0].id}`, "GET");
+        const revenus = await fetchInfo(`revenu/budget/${budgetData[0].id}`, "GET");
+        
+        if (!dateFin) {
+            let gainQuotidien = 0;
+        
+            revenus.forEach(revenu => {
+                if (revenu.depot_recurrence && revenu.montant) {
+                    gainQuotidien += revenu.montant / revenu.depot_recurrence;
+                }
+            });
+        
+            depenses.forEach(depense => {
+                if (depense.retrait_recurrence && depense.montant) {
+                    gainQuotidien -= depense.montant / depense.retrait_recurrence;
+                }
+            });
+        
+            if (gainQuotidien <= 0) {
+                console.error("Gain quotidien insuffisant pour atteindre l'objectif.");
+                return;
+            }
+        
+            const joursNecessaires = Math.ceil(butEpargne / gainQuotidien);
+            dateFin = new Date(dateDebut.getTime() + joursNecessaires * 24 * 60 * 60 * 1000);
+        } else {
+            const dateFin = new Date(budgetData[0].date_fin);
+        }
+        
         const aujourdhui = new Date(Date.now());
         const jourRestant = Math.max(0, Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24)));
         const jourAjourdhui = Math.max(0, Math.ceil((aujourdhui - dateDebut) / (1000 * 60 * 60 * 24)));
@@ -137,9 +167,6 @@ async function initGraphique() {
                             "<div>Montant cible : " + butEpargne +"$</div>" + 
                             "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>" + 
                             "<div>Allo</div>"
-
-        const depenses = await fetchInfo(`depense/budget/${budgetData[0].id}`, "GET");
-        const revenus = await fetchInfo(`revenu/budget/${budgetData[0].id}`, "GET");
 
         let transactions = [];
 
@@ -235,14 +262,14 @@ async function initGraphique() {
         .attr("y", height + 35)  
         .attr("text-anchor", "end") 
         .style("font-size", "14px")
-        .text("Days");
+        .text("(Jour)");
 
         svg.append("text")
         .attr("x", -45)
         .attr("y", 5)  
         .attr("text-anchor", "end") 
         .style("font-size", "14px")
-        .text("$");
+        .text("($)");
 
 
         const line = d3.line()
@@ -446,7 +473,7 @@ function gererProjets() {
             const projet = projets.find(p => p.nom === projetNom);
 
             if (projet) {
-                const confirmDelete = confirm(`Are you sure you want to delete "${projet.nom}"?`);
+                const confirmDelete = confirm(`Êtes-vous sûr de vouloir supprimer "${projet.nom}"?`);
                 if (confirmDelete) {
                     await supprimerProjet(projet.id, clientId);
                     deleteMode = false;
@@ -454,7 +481,7 @@ function gererProjets() {
                     chargerProjects();
                 }
             } else {
-                alert("Error: Could not find project ID.");
+                alert("Erreur: pas trouver projet id");
             }
         }
     });
@@ -465,10 +492,10 @@ async function supprimerProjet(projetId, clientId) {
     const response = await fetchInfo(`projet/delete/${projetId}/${clientId}`, "DELETE");
 
     if (response && response.success) {
-        alert("Project deleted successfully!");
+        alert("Projet supprimé avec succes!");
         chargerProjects(); 
     } else {
-        alert("Error deleting project.");
+        alert("Erreur lors de la supression de projet!");
     }
 }
 
