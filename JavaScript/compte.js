@@ -3,11 +3,82 @@ document.addEventListener("DOMContentLoaded", function(){
     init();
 })
 
-async function init(){
+async function init(){    
     //Prendres les variables de sessions
+    const id = sessionStorage.getItem("id");
+
+    try {
+        const response = await fetchInfo("client/" + id, "GET", {}, null);
+        if (response["is_admin"]){
+            afficherComptesAdmin();
+        } else {
+            afficherCompteClient();
+        }
+        
+    } catch (error) {
+        console.error("Erreur lors de la récupération du compte:", error);
+    }
+}
+
+async function afficherComptesAdmin() {
+    const formModif = document.getElementById("modification");
+    formModif.classList.add("hide");
+
+    try {
+        const response = await fetchInfo("client");
+        const divAdmin = document.getElementById("adminDiv");
+        divAdmin.classList.remove("hide");
+
+        // refresh la page html
+        divAdmin.innerHTML = "";
+
+        response.forEach(element => {
+            const divClient = document.createElement("div");
+            divClient.classList.add("client-card");
+
+            // Afficher information du comte
+            const nameTitle = document.createElement("h3");
+            nameTitle.textContent = `${element.prenom} ${element.nom}`;
+
+            const email = document.createElement("p");
+            email.innerHTML = `<strong>Email:</strong> ${element.email}`;
+
+            // Bouttons
+            const btnModify = document.createElement("button");
+            btnModify.textContent = "Modifier";
+            btnModify.classList.add("btn", "btn-modify");
+            btnModify.addEventListener("click", () => {
+                
+                //TODO:
+
+            });
+
+            const btnDelete = document.createElement("button");
+            btnDelete.textContent = "Supprimer";
+            btnDelete.classList.add("btn", "btn-delete");
+            btnDelete.addEventListener("click", async () => {
+                
+                //TODO:
+                
+                await afficherComptesAdmin();
+            });
+
+            // Append everything
+            divClient.appendChild(nameTitle);
+            divClient.appendChild(email);
+            divClient.appendChild(btnModify);
+            divClient.appendChild(btnDelete);
+            divAdmin.appendChild(divClient);
+        });
+    } catch (error) {
+        console.error("Erreur lors de la récupération des comptes:", error);
+    }
+}
+
+
+async function afficherCompteClient() {
     const idCompte = sessionStorage.getItem("id");
     const emailCompte = sessionStorage.getItem("email");
-
     //Prendre les éléments HTML du document pour pouvoir intéragir avec
     const formModif = document.getElementById("modification");
     const formMDP = document.getElementById("password");
@@ -214,7 +285,5 @@ async function init(){
             bConfirmer.classList.remove("loading");
             bAnnuler.classList.remove("loading");
         }
-    
     });
-
 }
