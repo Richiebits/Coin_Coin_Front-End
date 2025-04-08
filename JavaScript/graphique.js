@@ -1,13 +1,13 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 import { fetchInfo } from "./data.js";
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     init();
-
     window.addEventListener("resize", () => {
         initGraphique();
     });
 });
+
 
 function init() {
     let fileName = location.href;
@@ -16,12 +16,121 @@ function init() {
         populateGraphique();
         populateGraphiqueProjet();
         initGraphique();
+        gestionTransaction();
     }
     if (fileName.includes("projets.html")) {
         chargerProjects();
         gererProjets();
     }
 }
+
+async function gestionTransaction() {
+    const btnDepot = document.getElementById("btnDepot");
+    const btnRetrait = document.getElementById("btnRetrait");
+    const inputDepot = document.getElementById("depotMontant");
+    const inputRetrait = document.getElementById("retraitMontant");
+    const containerDepot = document.getElementById("depotInputContainer");
+    const containerRetrait = document.getElementById("retraitInputContainer");
+
+    let depotOpen = false;
+    let retraitOpen = false;
+
+    async function getCurrentBudgetId() {
+        const params = new URLSearchParams(window.location.search);
+        const projectName = params.get("titre");
+        const clientId = sessionStorage.getItem("id");
+        if (!projectName || !clientId) return null;
+
+        const projets = await fetchInfo(`projet/client/${clientId}`, "GET");
+        const projet = projets.find(p => p.nom === projectName);
+        if (!projet) return null;
+
+        const budgets = await fetchInfo(`budget/projet/${projet.id}`, "GET");
+        return budgets.length ? budgets[0].id : null;
+    }
+
+    btnDepot.addEventListener("click", async () => {
+        if (!depotOpen) {
+            containerDepot.style.display = "block";
+            depotOpen = true;
+        } else {
+            const montant = parseFloat(inputDepot.value);
+            const recurrence = parseInt(document.getElementById("depotRecurrence").value);
+            const txtDepot = document.getElementById("depotTransactionName").value; 
+            if (isNaN(montant) || montant <= 0) {
+                alert("Entrez un montant valide.");
+                return;
+            }
+    
+            const budgetId = await getCurrentBudgetId();
+            if (!budgetId) {
+                alert("Budget introuvable.");
+                return;
+            }
+            
+            const body = {
+                nom: txtDepot,
+                montant: montant,
+                depot_recurrence: recurrence,
+                budget_id: budgetId
+            };
+            console.log(body);
+    
+            const result = fetchInfo("revenu", "POST", {'Content-Type': 'application/json'}, body);
+            if (result) {
+                alert("Dépôt effectué avec succès !");
+                inputDepot.value = "";
+                containerDepot.style.display = "none";
+                depotOpen = false;
+                //initGraphique();
+            } else {
+                alert("Erreur lors du dépôt.");
+            }
+        }
+    });
+
+    btnRetrait.addEventListener("click", async () => {
+        if (!retraitOpen) {
+            containerRetrait.style.display = "block";
+            retraitOpen = true;
+        } else {
+            const montant = parseFloat(inputRetrait.value);
+            const recurrence = parseInt(document.getElementById("retraitRecurrence").value);
+            const txtRetrait = document.getElementById("retraitTransactionName").value; // Get the value when clicked
+            
+            if (isNaN(montant) || montant <= 0) {
+                alert("Entrez un montant valide.");
+                return;
+            }
+    
+            const budgetId = await getCurrentBudgetId();
+            if (!budgetId) {
+                alert("Budget introuvable.");
+                return;
+            }
+    
+            const body = {
+                nom: txtRetrait,
+                montant: montant,
+                retrait_recurrence: recurrence,
+                budget_id: budgetId
+            };
+    
+            const result = fetchInfo("depense", "POST", {'Content-Type': 'application/json'}, body);
+            if (result) {
+                alert("Retrait effectué avec succès !");
+                inputRetrait.value = "";
+                containerRetrait.style.display = "none";
+                retraitOpen = false;
+                initGraphique();
+            } else {
+                alert("Erreur lors du retrait.");
+            }
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", gestionTransaction);
 
 function populateGraphique() {
     let projets = document.querySelectorAll(".projet");
