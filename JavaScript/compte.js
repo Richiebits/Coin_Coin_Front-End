@@ -14,7 +14,7 @@ async function init(){
         } else {
             const idCompte = sessionStorage.getItem("id");
             const emailCompte = sessionStorage.getItem("email");
-            afficherCompteClient(idCompte);
+            afficherCompteClient(idCompte, false);
         }
         
     } catch (error) {
@@ -51,7 +51,7 @@ async function afficherComptesAdmin() {
             btnModify.classList.add("btn", "btn-modify");
             btnModify.addEventListener("click", () => {
                 
-                afficherCompteClient(`${element.id}`)
+                afficherCompteClient(`${element.id}`, true);
 
             });
 
@@ -59,10 +59,20 @@ async function afficherComptesAdmin() {
             btnDelete.textContent = "Supprimer";
             btnDelete.classList.add("btn", "btn-delete");
             btnDelete.addEventListener("click", async () => {
+
+                if (window.confirm("Être-vous certain de vouloir supprimer ce compte")){
+                    try {
+                        const routeDelete = "client/" + `${element.id}`;
+                        const responseDelete = await fetchInfo(routeDelete, "DELETE", null, null);
+                        alert("Le compte à été supprimé avec succès");
+                    } catch (error) {
+                        console.error("Erreur lors de la suppression du comptes:", error);
+                    }
+                    
+                    await afficherComptesAdmin();
+                }
                 
-                //TODO:
                 
-                await afficherComptesAdmin();
             });
 
             // Append everything
@@ -78,7 +88,7 @@ async function afficherComptesAdmin() {
 }
 
 
-async function afficherCompteClient(idCompte) {
+async function afficherCompteClient(idCompte, isAdmin) {
     const divAdmin = document.getElementById("adminDiv");
     divAdmin.classList.add("hide");
     
@@ -204,6 +214,12 @@ async function afficherCompteClient(idCompte) {
         if (isComplete && telValid && confirmPassword && isSafe){
             formModif.classList.add("hide");
             formMDP.classList.remove("hide");
+            const tvMDP = document.getElementById("tvMDP");
+            if (isAdmin){
+                tvMDP.innerHTML = "Mot de passe ADMIN"
+            } else {
+                tvMDP.innerHTML = "Mot de passe"
+            }
             document.getElementById("errorSection").innerHTML = "";
         } else {
             //Messages d'erreurs
