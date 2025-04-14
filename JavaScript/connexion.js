@@ -6,7 +6,7 @@ addEventListener("DOMContentLoaded", function() {
 function init(){
 
     const bRegister = document.getElementById("bRegister");
-    bRegister.addEventListener("click", function() {
+    bRegister.addEventListener("click", async function() {
         //Objet contenant tout les Inputs du formulaire Créer compte
         const textboxes = { "TBNom": document.getElementById("rNom"),
                             "TBPrenom": document.getElementById("rPrenom"),
@@ -36,7 +36,6 @@ function init(){
                 isComplete = false;
             }            
         }
-        
 
         //Vérifications avant de faire la demande a l'API
         if (!parametres["tel"]){
@@ -63,6 +62,30 @@ function init(){
             textboxes["TBEmail"].classList.remove("incomplet");
         }
 
+        //Vérification du mail
+        let isValid = true;
+        try {
+            const clients = await fetchInfo("client", "GET", {'Content-Type': 'application/json'});
+            console.log(clients);
+            clients.forEach(c => {
+                if (c["email"] === parametres["email"]) {
+                    //Email déjà utilisé donc erreur
+                    alert("email déjà utilisé");
+                    const email = document.getElementById("rEmail");
+                    email.classList.add("incomplet");
+                    isValid = false;
+                    return;
+                }
+            })
+        } catch (error) {
+            console.error("Erreur lors de la récupération des comptes:", error);
+        }
+        if (!isValid)
+            return;
+        else {
+            const email = document.getElementById("rEmail");
+            email.classList.remove("incomplet");
+        }
         //Vérification mot de passe (8 char / au moins 1 nbr / au moins 1 / )
         const regexMDP = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
         if (!regexMDP.test(parametres["MDP1"])){
@@ -95,6 +118,7 @@ function init(){
                         {'Content-Type': 'application/json'}, 
                         data)
         }
+        window.location.href = "connexion.html";
     })
     const bLogin = document.getElementById("bLogin");
     let compte = null;
