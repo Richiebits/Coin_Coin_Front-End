@@ -120,6 +120,7 @@ function init(){
                 const id = response["id"];
                 sessionStorage.setItem("id", id);
                 sessionStorage.setItem("email", inputEmail);
+                sessionStorage.setItem("token", response["token"]);
                 alert("Connection réussi!");
                 bLogin.classList.remove("loading");
                 window.location.href = "accueil.html";
