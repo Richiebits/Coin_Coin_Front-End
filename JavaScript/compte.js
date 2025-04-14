@@ -12,7 +12,9 @@ async function init(){
         if (response["is_admin"]){
             afficherComptesAdmin();
         } else {
-            afficherCompteClient();
+            const idCompte = sessionStorage.getItem("id");
+            const emailCompte = sessionStorage.getItem("email");
+            afficherCompteClient(idCompte);
         }
         
     } catch (error) {
@@ -49,7 +51,7 @@ async function afficherComptesAdmin() {
             btnModify.classList.add("btn", "btn-modify");
             btnModify.addEventListener("click", () => {
                 
-                //TODO:
+                afficherCompteClient(`${element.id}`)
 
             });
 
@@ -76,11 +78,14 @@ async function afficherComptesAdmin() {
 }
 
 
-async function afficherCompteClient() {
-    const idCompte = sessionStorage.getItem("id");
-    const emailCompte = sessionStorage.getItem("email");
+async function afficherCompteClient(idCompte) {
+    const divAdmin = document.getElementById("adminDiv");
+    divAdmin.classList.add("hide");
+    
+    
     //Prendre les éléments HTML du document pour pouvoir intéragir avec
     const formModif = document.getElementById("modification");
+    formModif.classList.remove("hide");
     const formMDP = document.getElementById("password");
 
     const bModifer = document.getElementById("bModifier")
@@ -257,7 +262,11 @@ async function afficherCompteClient() {
                     const responsePut = await fetchInfo(routePut, "PUT", {}, bodyMod);
                     
                     if (responsePut["success"] == true){
-                        sessionStorage.setItem("email", newEmail);
+
+                        if (sessionStorage.getItem("id") == idCompte){
+                            sessionStorage.setItem("email", newEmail);
+                        }
+
                         formModif.classList.remove("hide");
                         formMDP.classList.add("hide");
                         //On débloque le bouton confirmer une fois terminé
