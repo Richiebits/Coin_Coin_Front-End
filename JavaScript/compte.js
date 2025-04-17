@@ -14,7 +14,7 @@ async function init(){
         } else {
             const idCompte = sessionStorage.getItem("id");
             const emailCompte = sessionStorage.getItem("email");
-            afficherCompteClient(idCompte);
+            afficherCompteClient(idCompte, false);
         }
         
     } catch (error) {
@@ -51,7 +51,8 @@ async function afficherComptesAdmin() {
             btnModify.classList.add("btn", "btn-modify");
             btnModify.addEventListener("click", () => {
                 
-                afficherCompteClient(`${element.id}`)
+                afficherCompteClient(`${element.id}`, true);
+                
 
             });
 
@@ -59,10 +60,20 @@ async function afficherComptesAdmin() {
             btnDelete.textContent = "Supprimer";
             btnDelete.classList.add("btn", "btn-delete");
             btnDelete.addEventListener("click", async () => {
+
+                if (window.confirm("Être-vous certain de vouloir supprimer ce compte")){
+                    try {
+                        const routeDelete = "client/" + `${element.id}`;
+                        const responseDelete = await fetchInfo(routeDelete, "DELETE", null, null);
+                        alert("Le compte à été supprimé avec succès");
+                    } catch (error) {
+                        console.error("Erreur lors de la suppression du comptes:", error);
+                    }
+                    
+                    await afficherComptesAdmin();
+                }
                 
-                //TODO:
                 
-                await afficherComptesAdmin();
             });
 
             // Append everything
@@ -78,7 +89,7 @@ async function afficherComptesAdmin() {
 }
 
 
-async function afficherCompteClient(idCompte) {
+async function afficherCompteClient(idCompte, isAdmin) {
     const divAdmin = document.getElementById("adminDiv");
     divAdmin.classList.add("hide");
     
@@ -204,6 +215,12 @@ async function afficherCompteClient(idCompte) {
         if (isComplete && telValid && confirmPassword && isSafe){
             formModif.classList.add("hide");
             formMDP.classList.remove("hide");
+            const tvMDP = document.getElementById("tvMDP");
+            if (isAdmin){
+                tvMDP.innerHTML = "Mot de passe ADMIN"
+            } else {
+                tvMDP.innerHTML = "Mot de passe"
+            }
             document.getElementById("errorSection").innerHTML = "";
         } else {
             //Messages d'erreurs
@@ -231,7 +248,7 @@ async function afficherCompteClient(idCompte) {
     bConfirmer.addEventListener("click", async function(){
         const MDP = textboxes["TBPassword"].value;
         const route = "client/connexion";
-        const bodyConn = {  "email": emailCompte,
+        const bodyConn = {  "email": sessionStorage.getItem("email"),
                         "mot_de_passe": MDP};
 
         //Requête POST qui vérifie si le mot de passe est correct
@@ -240,7 +257,7 @@ async function afficherCompteClient(idCompte) {
             bConfirmer.classList.add("loading");
             bAnnuler.classList.add("loading");
             const response = await fetchInfo(route, "POST", {}, bodyConn);
-            console.log(emailCompte + " " + MDP + " " + response);
+            
             if (!response || Object.keys(response).length === 0) {
                 console.error("password incorrect", error);
                 bConfirmer.classList.remove("loading");
@@ -254,14 +271,21 @@ async function afficherCompteClient(idCompte) {
                 const newPrenom = textboxes["TBPrenom"].value;
                 const newTel = textboxes["TBTel"].value;
                 const newMDP = textboxes["TBNewPassword"].value != "" ? textboxes["TBNewPassword"].value : MDP;
-                console.log(newMDP);
                 //Si le mot de passe est correct on fait une autre requête PUT pour insérer dans la BD les nouvelles informations
                 try {
-                    const bodyMod = {"email": newEmail, "nom":newNom, "prenom":newPrenom, "tel":newTel, "id":idCompte, "mot_de_passe":newMDP};
-                    //textboxes["TBPassword"].value = "";
-                    const responsePut = await fetchInfo(routePut, "PUT", {}, bodyMod);
+                    let responsePut = {};
+                    if (isAdmin){
+                        const bodyMod = {"email": newEmail, "nom":newNom, "prenom":newPrenom, "tel":newTel, "id":idCompte};
+                        
+                        responsePut = await fetchInfo("admin/" + routePut, "PUT", {}, bodyMod);
+                    } else {
+                        const bodyMod = {"email": newEmail, "nom":newNom, "prenom":newPrenom, "tel":newTel, "id":idCompte, "mot_de_passe":newMDP};
                     
-                    if (responsePut["success"] == true){
+                        responsePut = await fetchInfo(routePut, "PUT", {}, bodyMod);
+                    }
+                    
+                    
+                    if (response != null && responsePut["success"] == true){
 
                         if (sessionStorage.getItem("id") == idCompte){
                             sessionStorage.setItem("email", newEmail);
@@ -274,7 +298,7 @@ async function afficherCompteClient(idCompte) {
                         bAnnuler.classList.remove("loading");
                         
                         alert(responsePut["message"]);
-                        classList.remove("loading");
+                        
                     } else {
                         alert("erreur lors de la modification du compte")
                         formModif.classList.remove("hide");
