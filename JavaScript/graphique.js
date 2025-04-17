@@ -24,13 +24,21 @@ function init() {
     }
 }
 
+let listenersAdded = false;
 async function gestionTransaction() {
+    if (listenersAdded) return; 
+    listenersAdded = true;
+
     const btnDepot = document.getElementById("btnDepot");
     const btnRetrait = document.getElementById("btnRetrait");
     const inputDepot = document.getElementById("depotMontant");
     const inputRetrait = document.getElementById("retraitMontant");
     const containerDepot = document.getElementById("depotInputContainer");
     const containerRetrait = document.getElementById("retraitInputContainer");
+
+    // NOUVEAUX BOUTONS
+    const btnConfirmerDepot = document.getElementById("btnConfirmerDepot");
+    const btnConfirmerRetrait = document.getElementById("btnConfirmerRetrait");
 
     let depotOpen = false;
     let retraitOpen = false;
@@ -49,83 +57,99 @@ async function gestionTransaction() {
         return budgets.length ? budgets[0].id : null;
     }
 
-    btnDepot.addEventListener("click", async () => {
-        if (!depotOpen) {
-            containerDepot.style.display = "block";
-            depotOpen = true;
+    // Toggle visibility for btnDepot
+    btnDepot.addEventListener("click", () => {
+        if (depotOpen) {
+            containerDepot.style.display = "none";
+            btnConfirmerDepot.style.display = "none";
         } else {
-            const montant = parseFloat(inputDepot.value);
-            const recurrence = parseInt(document.getElementById("depotRecurrence").value);
-            const txtDepot = document.getElementById("depotTransactionName").value; 
-            if (isNaN(montant) || montant <= 0) {
-                alert("Entrez un montant valide.");
-                return;
-            }
-    
-            const budgetId = await getCurrentBudgetId();
-            if (!budgetId) {
-                alert("Budget introuvable.");
-                return;
-            }
-            
-            const body = {
-                nom: txtDepot,
-                montant: montant,
-                depot_recurrence: recurrence,
-                budget_id: budgetId
-            };
-            console.log(body);
-    
-            const result = fetchInfo("revenu", "POST", {'Content-Type': 'application/json'}, body);
-            if (result) {
-                alert("Dépôt effectué avec succès !");
-                inputDepot.value = "";
-                containerDepot.style.display = "none";
-                depotOpen = false;
-                //initGraphique();
-            } else {
-                alert("Erreur lors du dépôt.");
-            }
+            containerDepot.style.display = "block";
+            btnConfirmerDepot.style.display = "inline-block";
+        }
+        depotOpen = !depotOpen;
+    });
+
+    // Toggle visibility for btnRetrait
+    btnRetrait.addEventListener("click", () => {
+        if (retraitOpen) {
+            containerRetrait.style.display = "none";
+            btnConfirmerRetrait.style.display = "none";
+        } else {
+            containerRetrait.style.display = "block";
+            btnConfirmerRetrait.style.display = "inline-block";
+        }
+        retraitOpen = !retraitOpen;
+    });
+
+    btnConfirmerDepot.addEventListener("click", async () => {
+        const montant = parseFloat(inputDepot.value);
+        const recurrence = parseInt(document.getElementById("depotRecurrence").value);
+        const txtDepot = document.getElementById("depotTransactionName").value;
+
+        if (isNaN(montant) || montant <= 0) {
+            alert("Entrez un montant valide.");
+            return;
+        }
+
+        const budgetId = await getCurrentBudgetId();
+        if (!budgetId) {
+            alert("Budget introuvable.");
+            return;
+        }
+
+        const body = {
+            nomDepot: txtDepot,
+            montantDepot: montant,
+            depot_recurrence: recurrence,
+            id: budgetId
+        };
+
+        const result = await fetchInfo("revenu", "POST", { 'Content-Type': 'application/json' }, body);
+        if (result) {
+            alert("Dépôt effectué avec succès !");
+            inputDepot.value = "";
+            containerDepot.style.display = "none";
+            btnConfirmerDepot.style.display = "none";
+            depotOpen = false;
+            initGraphique();
+        } else {
+            alert("Erreur lors du dépôt.");
         }
     });
 
-    btnRetrait.addEventListener("click", async () => {
-        if (!retraitOpen) {
-            containerRetrait.style.display = "block";
-            retraitOpen = true;
+    btnConfirmerRetrait.addEventListener("click", async () => {
+        const montant = parseFloat(inputRetrait.value);
+        const recurrence = parseInt(document.getElementById("retraitRecurrence").value);
+        const txtRetrait = document.getElementById("retraitTransactionName").value;
+
+        if (isNaN(montant) || montant <= 0) {
+            alert("Entrez un montant valide.");
+            return;
+        }
+
+        const budgetId = await getCurrentBudgetId();
+        if (!budgetId) {
+            alert("Budget introuvable.");
+            return;
+        }
+
+        const body = {
+            nomRetrait: txtRetrait,
+            montantRetrait: montant,
+            retrait_recurrence: recurrence,
+            id: budgetId
+        };
+
+        const result = await fetchInfo("depense", "POST", { 'Content-Type': 'application/json' }, body);
+        if (result) {
+            alert("Retrait effectué avec succès !");
+            inputRetrait.value = "";
+            containerRetrait.style.display = "none";
+            btnConfirmerRetrait.style.display = "none";
+            retraitOpen = false;
+            initGraphique();
         } else {
-            const montant = parseFloat(inputRetrait.value);
-            const recurrence = parseInt(document.getElementById("retraitRecurrence").value);
-            const txtRetrait = document.getElementById("retraitTransactionName").value; // Get the value when clicked
-            
-            if (isNaN(montant) || montant <= 0) {
-                alert("Entrez un montant valide.");
-                return;
-            }
-    
-            const budgetId = await getCurrentBudgetId();
-            if (!budgetId) {
-                alert("Budget introuvable.");
-                return;
-            }
-    
-            const body = {
-                nom: txtRetrait,
-                montant: montant,
-                retrait_recurrence: recurrence,
-                budget_id: budgetId
-            };
-    
-            const result = fetchInfo("depense", "POST", {'Content-Type': 'application/json'}, body);
-            if (result) {
-                alert("Retrait effectué avec succès !");
-                inputRetrait.value = "";
-                containerRetrait.style.display = "none";
-                retraitOpen = false;
-                initGraphique();
-            } else {
-                alert("Erreur lors du retrait.");
-            }
+            alert("Erreur lors du retrait.");
         }
     });
 }
@@ -290,9 +314,20 @@ async function initGraphique() {
                             value: revenu.montant
                         });
                     }
-                }
-            });
+                }else if (revenu.date_depot) {
+            // Dépôt instantané
+            const dateDepot = new Date(revenu.date_depot);
+            const daySinceStart = Math.max(0, Math.floor((dateDepot - dateDebut) / (1000 * 60 * 60 * 24)));
+
+            if (daySinceStart <= jourAjourdhui) {
+                transactions.push({
+                    day: daySinceStart,
+                    value: revenu.montant
+                });
+            }
         }
+    });
+}
 
         if (depenses) {
             depenses.forEach(depense => {
@@ -302,6 +337,17 @@ async function initGraphique() {
                     for (let jour = depense.retrait_recurrence; jour <= jourAjourdhui; jour += depense.retrait_recurrence) {
                         transactions.push({
                             day: jour,
+                            value: -depense.montant
+                        });
+                    }
+                } else if (depense.date_retrait) {
+                    // Dépense instantanée
+                    const dateRetrait = new Date(depense.date_retrait);
+                    const daySinceStart = Math.max(0, Math.floor((dateRetrait - dateDebut) / (1000 * 60 * 60 * 24)));
+        
+                    if (daySinceStart <= jourAjourdhui) {
+                        transactions.push({
+                            day: daySinceStart,
                             value: -depense.montant
                         });
                     }
