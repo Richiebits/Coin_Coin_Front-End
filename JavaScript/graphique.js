@@ -54,7 +54,7 @@ async function gestionTransaction() {
         if (!projet) return null;
 
         const budgets = await fetchInfo(`budget/projet/${projet.id}`, "GET");
-        return budgets.length ? budgets[0].id : null;
+        return budgets.length ? { budgetId: budgets[0].id, projetId: projet.id } : null;
     }
 
     // Toggle visibility for btnDepot
@@ -91,8 +91,8 @@ async function gestionTransaction() {
             return;
         }
 
-        const budgetId = await getCurrentBudgetId();
-        if (!budgetId) {
+        const info = await getCurrentBudgetId();
+        if (!info) {
             alert("Budget introuvable.");
             return;
         }
@@ -101,7 +101,7 @@ async function gestionTransaction() {
             nomDepot: txtDepot,
             montantDepot: montant,
             depot_recurrence: recurrence,
-            id: budgetId
+            id: info.budgetId
         };
 
         const result = await fetchInfo("revenu", "POST", { 'Content-Type': 'application/json' }, body);
@@ -111,6 +111,7 @@ async function gestionTransaction() {
             containerDepot.style.display = "none";
             btnConfirmerDepot.style.display = "none";
             depotOpen = false;
+            await addToHistorique(info.projetId, "depot", montant);
             initGraphique();
         } else {
             alert("Erreur lors du dépôt.");
@@ -122,13 +123,13 @@ async function gestionTransaction() {
         const recurrence = parseInt(document.getElementById("retraitRecurrence").value);
         const txtRetrait = document.getElementById("retraitTransactionName").value;
 
-        if (isNaN(montant) || montant <= 0) {
+        if (isNaN(montant) || montant <= 0  ) {
             alert("Entrez un montant valide.");
             return;
         }
 
-        const budgetId = await getCurrentBudgetId();
-        if (!budgetId) {
+        const info = await getCurrentBudgetId();
+        if (!info) {
             alert("Budget introuvable.");
             return;
         }
@@ -137,7 +138,7 @@ async function gestionTransaction() {
             nomRetrait: txtRetrait,
             montantRetrait: montant,
             retrait_recurrence: recurrence,
-            id: budgetId
+            id: info.budgetId
         };
 
         const result = await fetchInfo("depense", "POST", { 'Content-Type': 'application/json' }, body);
@@ -147,12 +148,26 @@ async function gestionTransaction() {
             containerRetrait.style.display = "none";
             btnConfirmerRetrait.style.display = "none";
             retraitOpen = false;
+            await addToHistorique(info.projetId, "retrait", montant);
             initGraphique();
         } else {
             alert("Erreur lors du retrait.");
         }
     });
 }
+
+async function addToHistorique(projetId, type, montant) {
+    const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
+
+    const body = {
+        projet_id: projetId,
+        date_histo: today,
+        type: type,
+        montant: montant
+    };
+    return await fetchInfo("historique", "POST", { 'Content-Type': 'application/json' }, body);
+}
+
 
 document.addEventListener("DOMContentLoaded", gestionTransaction);
 
@@ -314,20 +329,9 @@ async function initGraphique() {
                             value: revenu.montant
                         });
                     }
-                }else if (revenu.date_depot) {
-            // Dépôt instantané
-            const dateDepot = new Date(revenu.date_depot);
-            const daySinceStart = Math.max(0, Math.floor((dateDepot - dateDebut) / (1000 * 60 * 60 * 24)));
-
-            if (daySinceStart <= jourAjourdhui) {
-                transactions.push({
-                    day: daySinceStart,
-                    value: revenu.montant
-                });
-            }
+                }
+            });
         }
-    });
-}
 
         if (depenses) {
             depenses.forEach(depense => {
@@ -340,17 +344,23 @@ async function initGraphique() {
                             value: -depense.montant
                         });
                     }
-                } else if (depense.date_retrait) {
-                    // Dépense instantanée
-                    const dateRetrait = new Date(depense.date_retrait);
-                    const daySinceStart = Math.max(0, Math.floor((dateRetrait - dateDebut) / (1000 * 60 * 60 * 24)));
+                } 
+            });
+        }
+
+        const historiques = await fetchInfo(`historique/projet/${projetId}`, "GET");
+        console.log("voici l'historique : " + historiques);
+        if (historiques && historiques.length > 0) {
+            historiques.forEach(entry => {
+                const jourDepuisDebut = Math.ceil(
+                    (new Date(entry.date_histo) - dateDebut) / (1000 * 60 * 60 * 24)
+                );
         
-                    if (daySinceStart <= jourAjourdhui) {
-                        transactions.push({
-                            day: daySinceStart,
-                            value: -depense.montant
-                        });
-                    }
+                if (jourDepuisDebut >= 0 && jourDepuisDebut <= jourAjourdhui) {
+                    transactions.push({
+                        day: jourDepuisDebut,
+                        value: entry.type === 'depot' ? entry.montant : -entry.montant
+                    });
                 }
             });
         }
