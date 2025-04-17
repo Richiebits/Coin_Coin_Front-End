@@ -158,3 +158,39 @@ input[type=button].loading {
     background-color: #D9D9D9;
     pointer-events: none;
 }
+
+.tooltip {
+    cursor:default;
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltipText {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 13px;
+    visibility: hidden;
+    width: 200px;
+    background-color: rgba(0, 0, 0, 0.781);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+  
+    /* Position du tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    left: 50%;
+    margin-left: -100px;
+}
+
+.tooltip:hover .tooltipText {
+    visibility: visible;
+}
+
+
+#infoLogo {
+    width: 30px;
+    margin-left: 10px;
+    
+}
