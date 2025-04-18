@@ -111,7 +111,7 @@ async function gestionTransaction() {
             containerDepot.style.display = "none";
             btnConfirmerDepot.style.display = "none";
             depotOpen = false;
-            await addToHistorique(info.projetId, "depot", montant);
+            await addToHistorique(info.projetId, sessionStorage.getItem("id"), "depot", montant);
             initGraphique();
         } else {
             alert("Erreur lors du dépôt.");
@@ -148,7 +148,7 @@ async function gestionTransaction() {
             containerRetrait.style.display = "none";
             btnConfirmerRetrait.style.display = "none";
             retraitOpen = false;
-            await addToHistorique(info.projetId, "retrait", montant);
+            await addToHistorique(info.projetId, sessionStorage.getItem("id"), "retrait", montant);
             initGraphique();
         } else {
             alert("Erreur lors du retrait.");
@@ -156,11 +156,12 @@ async function gestionTransaction() {
     });
 }
 
-async function addToHistorique(projetId, type, montant) {
+async function addToHistorique(projetId, clientId, type, montant) {
     const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
 
     const body = {
         projet_id: projetId,
+        client_id: clientId,
         date_histo: today,
         type: type,
         montant: montant

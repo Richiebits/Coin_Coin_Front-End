@@ -122,6 +122,10 @@ a.pages:focus::after {
     color: red;
 }
 
+.action .amount.budget {
+    color: blue;
+}
+
 footer {
     background-color: #45474B;
     display: flex;
