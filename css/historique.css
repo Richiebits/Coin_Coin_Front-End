@@ -1,0 +1,150 @@
+body {
+    margin: 0;
+    background-color: #F5F7F8;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 100%;
+    grid-template-areas: 
+        "header"
+        "main"
+        "footer";
+    min-height: 100vh;
+}
+
+header {
+    position:fixed;
+    top: 0;
+    width: 100%;
+    grid-area: header;
+    z-index: 5;
+}
+#head {
+    background-color: #FCDE70;
+    display: flex;
+    
+    margin:0;
+    font-family: 'Junge';
+    color: 45474B;
+    font-size: x-large;
+    align-items: center;
+    height: 9rem;
+}
+
+#logo {
+    height: 10rem;
+    position: relative;
+    margin: 0.1rem;
+  }
+#circle {
+    height: 8rem;
+    width: 8rem;
+    background-color: #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    margin:1rem;
+}
+#nav {
+    background-color: #E8B86D;
+    margin: 0;
+    display: flex;
+}
+a.pages {       
+    display: block;
+    position: relative;
+    padding: 0.2em 0;
+    color: #F5F7F8;
+    text-decoration: none;
+    margin-left: 3em;
+    margin-top:0.5em;
+    margin-right: 3em;
+    margin-bottom: 0.5em;
+    font-family: "Galindo";
+}
+
+a.pages::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0.15em;
+    background-color: rgb(31, 27, 27);
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 300ms, transform 300ms;
+    z-index: 5;
+}
+  
+a.pages:hover::after,
+a.pages:focus::after {
+    opacity: 1;
+    transform: translate3d(0, 0.15em, 0);
+}
+#historique-container {
+    font-family: 'Junge';
+    padding: 2rem;
+    margin-top: 12rem; /* to avoid overlap with fixed header */
+}
+
+#historique-container h2 {
+    font-size: 2rem;
+    color: #45474B;
+    margin-bottom: 1.5rem;
+}
+
+.action {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 2fr;
+    gap: 1rem;
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: #45474B;
+}
+
+.action .amount {
+    font-weight: bold;
+}
+
+.action .amount::before {
+    content: '';
+    margin-right: 0.5rem;
+}
+
+.action .amount.positive {
+    color: green;
+}
+
+.action .amount.negative {
+    color: red;
+}
+
+footer {
+    background-color: #45474B;
+    display: flex;
+    flex-direction: row;
+    height: 15rem;
+    justify-content: space-around;
+    align-items: center;
+    grid-area: footer;
+}
+
+footer p a {
+    color: #F5F7F8;
+    font-family: "Galindo";
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2px;
+    text-decoration: none;
+}
+footer p a:hover {
+    text-decoration: underline;
+}
+
+footer img {
+    height: 10rem;
+}
