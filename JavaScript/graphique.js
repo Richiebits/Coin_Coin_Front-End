@@ -364,6 +364,7 @@ async function initGraphique() {
                 }
             });
         }
+        transactions = transactions.filter(t => t.day <= jourRestant);
 
         let mergedTransactions = transactions.reduce((acc, transaction) => {
             if (!acc[transaction.day]) {
