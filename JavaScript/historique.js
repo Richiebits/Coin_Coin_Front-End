@@ -55,17 +55,14 @@ async function afficherHistorique(listeHistorique, idCompte){
         projetFilter.appendChild(opt);
     });
 
-    // Add filters to container
     filterContainer.appendChild(typeFilter);
     filterContainer.appendChild(projetFilter);
     container.appendChild(filterContainer);
 
-    // ⬇️ History list wrapper
     const actionsWrapper = document.createElement("div");
     actionsWrapper.id = "actions-wrapper";
     container.appendChild(actionsWrapper);
 
-    // Render function
     function renderHistorique(filtreType, filtreProjet) {
         actionsWrapper.innerHTML = "";
 
@@ -115,11 +112,8 @@ async function afficherHistorique(listeHistorique, idCompte){
             actionsWrapper.appendChild(actionDiv);
         });
     }
-
-    // Initial render
     renderHistorique("tous", "tous");
 
-    // ⬅️ Event listeners on filters
     typeFilter.addEventListener("change", () => {
         renderHistorique(typeFilter.value, projetFilter.value);
     });
