@@ -125,6 +125,31 @@ a.pages:focus::after {
 .action .amount.budget {
     color: blue;
 }
+#filters {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    align-items: center;
+    font-family: 'Junge';
+}
+
+#filters select {
+    background-color: #fff;
+    border: 2px solid #E8B86D;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    font-size: 1.1rem;
+    font-family: 'Galindo';
+    color: #45474B;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+#filters select:hover {
+    border-color: #FCDE70;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
 
 footer {
     background-color: #45474B;
