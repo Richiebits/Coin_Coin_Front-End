@@ -310,12 +310,6 @@ async function initGraphique() {
         const jourRestant = Math.max(0, Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24)));
         const jourAjourdhui = Math.max(0, Math.ceil((aujourdhui - dateDebut) / (1000 * 60 * 60 * 24)));
 
-        //AFFICHER INFO DU PROJET ICI
-        const section = document.getElementById("description");
-        section.innerHTML = "<div>Date actuelle : " + aujourdhui.getDate() + "/" + aujourdhui.getMonth() + "/" + aujourdhui.getFullYear() + "</div>" +
-                            "<div>Montant cible : " + butEpargne +"$</div>" + 
-                            "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>";
-
         let transactions = [];
 
         if (revenus) {
@@ -396,6 +390,22 @@ async function initGraphique() {
             if (cumulativeValue > maxYValue) maxYValue = cumulativeValue;
             return { day: transaction.day, value: cumulativeValue };
         });
+
+        //AFFICHER INFO DU PROJET ICI
+        if(butEpargne-cumulativeValue > 0){
+            let montantRestant = butEpargne-cumulativeValue;
+            const section = document.getElementById("description");
+            section.innerHTML = "<div>Date actuelle : " + aujourdhui.getDate() + "/" + aujourdhui.getMonth() + "/" + aujourdhui.getFullYear() + "</div>" +
+                            "<div>Montant cible : " + butEpargne +"$</div>" + 
+                            "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>" +
+                            "<div><u> Montant restant : " + montantRestant + "</u></div>";
+        } else {
+            const section = document.getElementById("description");
+            section.innerHTML = "<div>Date actuelle : " + aujourdhui.getDate() + "/" + aujourdhui.getMonth() + "/" + aujourdhui.getFullYear() + "</div>" +
+                            "<div>Montant cible : " + butEpargne +"$</div>" + 
+                            "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>" +
+                            "<div><b><h2><u> Montant Cible Atteint! </u></h2></b></div>";
+        }
         
         const data = [
             { day: 0, value: 0 },
