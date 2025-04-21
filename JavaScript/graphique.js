@@ -314,8 +314,7 @@ async function initGraphique() {
         const section = document.getElementById("description");
         section.innerHTML = "<div>Date actuelle : " + aujourdhui.getDate() + "/" + aujourdhui.getMonth() + "/" + aujourdhui.getFullYear() + "</div>" +
                             "<div>Montant cible : " + butEpargne +"$</div>" + 
-                            "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>" + 
-                            "<div>Allo</div>"
+                            "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>";
 
         let transactions = [];
 

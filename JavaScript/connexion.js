@@ -97,9 +97,17 @@ function init(){
             textboxes["TBMDP2"].classList.remove("incomplet");
         }
 
+        let goodConfirmPassword = false;
+        if(parametres["MDP1"] == parametres["MDP2"]) {
+            goodConfirmPassword = true;
+
+        } else {
+            textboxes["TBMDP2"].classList.add("incomplet");
+        }
+
 
         //Vérification final pour API
-        if (isComplete && telValid && parametres["MDP1"] == parametres["MDP2"]){
+        if (isComplete && telValid && goodConfirmPassword){
             const data = {
                 email:parametres["email"],
                 nom:parametres["nom"],
@@ -108,17 +116,20 @@ function init(){
             }
             if (tel){
                 data.tel = parametres["tel"];
+            } else {
+                data.tel = null;
             }
             for (const tb in textboxes){
                 textboxes[tb].value = "";
             }
-            alert("Le compte a été créer avec succès");
-            fetchInfo(  "client", 
+            const response = await fetchInfo(  "client", 
                         "POST", 
                         {'Content-Type': 'application/json'}, 
                         data)
+            alert("Le compte a été créé avec succès");
+            window.location.href = "connexion.html";
         }
-        window.location.href = "connexion.html";
+        
     })
     const bLogin = document.getElementById("bLogin");
     let compte = null;
