@@ -109,7 +109,7 @@ async function afficherHistorique(listeHistorique, idCompte){
             actionDiv.appendChild(amount);
             actionDiv.appendChild(project);
 
-            actionsWrapper.appendChild(actionDiv);
+            actionsWrapper.prepend(actionDiv);
         });
     }
     renderHistorique("tous", "tous");
