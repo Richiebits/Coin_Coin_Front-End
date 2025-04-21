@@ -52,7 +52,7 @@ async function creerProjetDate() {
     const TBMontantCible = document.getElementById('TBMontantCible').value;
     const TBDateCible = document.getElementById('TBDateCible').value;
     const idClient = sessionStorage.getItem("id");
-    const dataProjet = { nomProjet:TBNom, but_epargne:TBMontantCible, client_id:idClient, retraits_total:null, depots_total:null, date_fin:TBDateCible };
+    const dataProjet = { nomProjet:TBNom, but_epargne:TBMontantCible, client_id:idClient, montantRetrait:null, montantDepot:null, date_fin:TBDateCible };
     let isNomUnique = true;
     let isComplet = true;
     //Vérifie nom du projet
@@ -115,8 +115,7 @@ async function creerProjetBudget() {
     freqRetrait = getIndexFrequence(freqRetrait);
 
     //Préparation des données à envoyer dans les fetch
-    const dataProjet = { nomProjet:TBNom, but_epargne:TBMontantCible, client_id:idClient, 
-                         retraits_total:TBRetrait, depots_total:TBDepot, date_fin:null,
+    const dataProjet = { nomProjet:TBNom, but_epargne:TBMontantCible, client_id:idClient, date_fin:null,
                          nomDepot:null, montantDepot:TBDepot, depot_recurrence:freqDepot,
                          nomRetrait:null, montantRetrait:TBRetrait, retrait_recurrence:freqRetrait};
 
