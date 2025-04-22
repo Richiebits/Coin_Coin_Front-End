@@ -457,12 +457,12 @@ async function initGraphique() {
             .y(d => yScale(d.value))
             .curve(d3.curveMonotoneX); 
 
-        let simulatedTransactions = [];
+        let transactionSimuler = [];
 
         revenus.forEach(revenu => {
             if (revenu.depot_recurrence && revenu.montant) {
                 for (let jour = revenu.depot_recurrence; jour <= jourRestant; jour += revenu.depot_recurrence) {
-                    simulatedTransactions.push({ day: jour, value: revenu.montant });
+                    transactionSimuler.push({ day: jour, value: revenu.montant });
                 }
             }
         });
@@ -470,7 +470,7 @@ async function initGraphique() {
         depenses.forEach(depense => {
             if (depense.retrait_recurrence && depense.montant) {
                 for (let jour = depense.retrait_recurrence; jour <= jourRestant; jour += depense.retrait_recurrence) {
-                    simulatedTransactions.push({ day: jour, value: -depense.montant });
+                    transactionSimuler.push({ day: jour, value: -depense.montant });
                 }
             }
         });
@@ -481,7 +481,7 @@ async function initGraphique() {
                     (new Date(entry.date_histo) - dateDebut) / (1000 * 60 * 60 * 24)
                 );
                 if (jourDepuisDebut >= 0 && jourDepuisDebut <= jourAjourdhui) {
-                    simulatedTransactions.push({
+                    transactionSimuler.push({
                         day: jourDepuisDebut,
                         value: entry.type === 'depot' ? entry.montant : entry.montant
                     });
@@ -489,14 +489,14 @@ async function initGraphique() {
             });
         }
 
-        let cumulativeSimulated = 0;
-        let predictionLineData = simulatedTransactions
+        let cumulativeSimuler = 0;
+        let predictionLineData = transactionSimuler
             .sort((a, b) => a.day - b.day)
             .map(transaction => {
-                cumulativeSimulated += transaction.value;
+                cumulativeSimuler += transaction.value;
                 return {
                     day: transaction.day,
-                    value: cumulativeSimulated
+                    value: cumulativeSimuler
                 };
             });
 
