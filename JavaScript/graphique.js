@@ -101,7 +101,13 @@ async function gestionTransaction() {
             nomDepot: txtDepot,
             montantDepot: montant,
             depot_recurrence: recurrence,
-            id: info.budgetId
+            id: info.budgetId,
+
+            projet_id: info.projetId,
+            client_id: sessionStorage.getItem("id"),
+            date_histo: new Date().toISOString().split("T")[0], // format YYYY-MM-DD
+            type: "depot",
+            montant: montant
         };
 
         const result = await fetchInfo("revenu", "POST", { 'Content-Type': 'application/json' }, body);
@@ -111,7 +117,6 @@ async function gestionTransaction() {
             containerDepot.style.display = "none";
             btnConfirmerDepot.style.display = "none";
             depotOpen = false;
-            await addToHistorique(info.projetId, sessionStorage.getItem("id"), "depot", montant);
             initGraphique();
         } else {
             alert("Erreur lors du dépôt.");
@@ -138,17 +143,23 @@ async function gestionTransaction() {
             nomRetrait: txtRetrait,
             montantRetrait: montant,
             retrait_recurrence: recurrence,
-            id: info.budgetId
+            id: info.budgetId,
+
+            projet_id: info.projetId,
+            client_id: sessionStorage.getItem("id"),
+            date_histo: new Date().toISOString().split("T")[0], // format YYYY-MM-DD
+            type: "retrait",
+            montant: -montant
         };
 
         const result = await fetchInfo("depense", "POST", { 'Content-Type': 'application/json' }, body);
+        console.log("RESULT IS : " + result)
         if (result) {
             alert("Retrait effectué avec succès !");
             inputRetrait.value = "";
             containerRetrait.style.display = "none";
             btnConfirmerRetrait.style.display = "none";
             retraitOpen = false;
-            await addToHistorique(info.projetId, sessionStorage.getItem("id"), "retrait", montant);
             initGraphique();
         } else {
             alert("Erreur lors du retrait.");
@@ -156,21 +167,8 @@ async function gestionTransaction() {
     });
 }
 
-async function addToHistorique(projetId, clientId, type, montant) {
-    const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
-
-    const body = {
-        projet_id: projetId,
-        client_id: clientId,
-        date_histo: today,
-        type: type,
-        montant: montant
-    };
-    return await fetchInfo("historique", "POST", { 'Content-Type': 'application/json' }, body);
-}
-
-
 document.addEventListener("DOMContentLoaded", gestionTransaction);
+
 
 function populateGraphique() {
     let projets = document.querySelectorAll(".projet");
@@ -267,7 +265,6 @@ async function initGraphique() {
         
         const projetId = projetChoisi.id;
         const budgetData = await fetchInfo(`budget/projet/${projetId}`, "GET");
-        console.log(budgetData[0].date_fin);
         if (!budgetData || !budgetData[0].date_debut) {
             console.error("Budget data existe pas");
             return;
@@ -343,23 +340,21 @@ async function initGraphique() {
         }
 
         const historiques = await fetchInfo(`historique/projet/${projetId}`, "GET");
-        console.log("voici l'historique : " + historiques);
         if (historiques && historiques.length > 0) {
             historiques.forEach(entry => {
                 const jourDepuisDebut = Math.ceil(
                     (new Date(entry.date_histo) - dateDebut) / (1000 * 60 * 60 * 24)
                 );
-        
+                console.log(entry.type + " montant : " + entry.montant);
                 if (jourDepuisDebut >= 0 && jourDepuisDebut <= jourAjourdhui) {
                     transactions.push({
                         day: jourDepuisDebut,
-                        value: entry.type === 'depot' ? entry.montant : -entry.montant
+                        value: entry.type === 'depot' ? entry.montant : entry.montant
                     });
                 }
             });
         }
         transactions = transactions.filter(t => t.day <= jourRestant);
-
         let mergedTransactions = transactions.reduce((acc, transaction) => {
             if (!acc[transaction.day]) {
                 acc[transaction.day] = { day: transaction.day, value: 0 };
@@ -380,7 +375,6 @@ async function initGraphique() {
         });
 
         console.log(transactions);
-        console.log(`Jour actuel: ${jourAjourdhui}`);
 
         cumulativeValue = 0;
         let maxYValue = butEpargne;
@@ -391,21 +385,24 @@ async function initGraphique() {
             return { day: transaction.day, value: cumulativeValue };
         });
 
-        //AFFICHER INFO DU PROJET ICI
-        if(butEpargne-cumulativeValue > 0){
-            let montantRestant = butEpargne-cumulativeValue;
+        // AFFICHER INFO DU PROJET ICI
+        if (butEpargne - cumulativeValue > 0) {
+            let montantRestant = butEpargne - cumulativeValue;
             const section = document.getElementById("description");
-            section.innerHTML = "<div>Date actuelle : " + aujourdhui.getDate() + "/" + aujourdhui.getMonth() + "/" + aujourdhui.getFullYear() + "</div>" +
-                            "<div>Montant cible : " + butEpargne +"$</div>" + 
-                            "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>" +
-                            "<div><u> Montant restant : " + montantRestant + "</u></div>";
+            section.innerHTML =
+                "<div>Date actuelle : " + aujourdhui.getDate() + "/" + (aujourdhui.getMonth() + 1) + "/" + aujourdhui.getFullYear() + "</div>" +
+                "<div>Montant cible : " + butEpargne + "$</div>" +
+                "<div>Date cible : " + dateFin.getDate() + "/" + (dateFin.getMonth() + 1) + "/" + dateFin.getFullYear() + "</div>" +
+                "<div><u> Montant restant : " + montantRestant + "</u></div>";
         } else {
             const section = document.getElementById("description");
-            section.innerHTML = "<div>Date actuelle : " + aujourdhui.getDate() + "/" + aujourdhui.getMonth() + "/" + aujourdhui.getFullYear() + "</div>" +
-                            "<div>Montant cible : " + butEpargne +"$</div>" + 
-                            "<div>Date cible : " + dateFin.getDate() + "/" + dateFin.getMonth() + "/" + dateFin.getFullYear() + "</div>" +
-                            "<div><b><h2><u> Montant Cible Atteint! </u></h2></b></div>";
+            section.innerHTML =
+                "<div>Date actuelle : " + aujourdhui.getDate() + "/" + (aujourdhui.getMonth() + 1) + "/" + aujourdhui.getFullYear() + "</div>" +
+                "<div>Montant cible : " + butEpargne + "$</div>" +
+                "<div>Date cible : " + dateFin.getDate() + "/" + (dateFin.getMonth() + 1) + "/" + dateFin.getFullYear() + "</div>" +
+                "<div><b><h2><u> Montant Cible Atteint! </u></h2></b></div>";
         }
+
         
         const data = [
             { day: 0, value: 0 },
@@ -433,8 +430,15 @@ async function initGraphique() {
         svg.append("g")
             .call(yAxis);
 
+            svg.append("text")
+            .attr("x", width + 30)  
+            .attr("y", height + 20)  
+            .attr("text-anchor", "end") 
+            .style("font-size", "14px")
+            .text((dateFin).toISOString().split('T')[0]);
+
         svg.append("text")
-        .attr("x", width)  
+        .attr("x", width + 30)  
         .attr("y", height + 35)  
         .attr("text-anchor", "end") 
         .style("font-size", "14px")
@@ -451,7 +455,74 @@ async function initGraphique() {
         const line = d3.line()
             .x(d => xScale(d.day))
             .y(d => yScale(d.value))
+            .curve(d3.curveMonotoneX); 
+
+        let simulatedTransactions = [];
+
+        revenus.forEach(revenu => {
+            if (revenu.depot_recurrence && revenu.montant) {
+                for (let jour = revenu.depot_recurrence; jour <= jourRestant; jour += revenu.depot_recurrence) {
+                    simulatedTransactions.push({ day: jour, value: revenu.montant });
+                }
+            }
+        });
+
+        depenses.forEach(depense => {
+            if (depense.retrait_recurrence && depense.montant) {
+                for (let jour = depense.retrait_recurrence; jour <= jourRestant; jour += depense.retrait_recurrence) {
+                    simulatedTransactions.push({ day: jour, value: -depense.montant });
+                }
+            }
+        });
+
+        if (historiques && historiques.length > 0) {
+            historiques.forEach(entry => {
+                const jourDepuisDebut = Math.ceil(
+                    (new Date(entry.date_histo) - dateDebut) / (1000 * 60 * 60 * 24)
+                );
+                if (jourDepuisDebut >= 0 && jourDepuisDebut <= jourAjourdhui) {
+                    simulatedTransactions.push({
+                        day: jourDepuisDebut,
+                        value: entry.type === 'depot' ? entry.montant : entry.montant
+                    });
+                }
+            });
+        }
+
+        let cumulativeSimulated = 0;
+        let predictionLineData = simulatedTransactions
+            .sort((a, b) => a.day - b.day)
+            .map(transaction => {
+                cumulativeSimulated += transaction.value;
+                return {
+                    day: transaction.day,
+                    value: cumulativeSimulated
+                };
+            });
+
+        predictionLineData.unshift({ day: 0, value: 0 });
+
+        const [minX, maxX] = xScale.domain();
+        const [minY, maxY] = yScale.domain();
+
+        predictionLineData = predictionLineData.filter(point => 
+            point.day >= minX && point.day <= maxX &&
+            point.value >= minY && point.value <= maxY
+        );
+
+        const predictionLine = d3.line()
+            .x(d => xScale(d.day))
+            .y(d => yScale(d.value))
             .curve(d3.curveMonotoneX);
+
+        svg.append("path")
+            .datum(predictionLineData)
+            .attr("fill", "none")
+            .attr("stroke", "#888")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "4 4")
+            .attr("d", predictionLine);
+
 
         svg.append("path")
             .datum(data)
