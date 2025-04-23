@@ -198,7 +198,7 @@ async function afficherCompteClient(idCompte, isAdmin) {
         //Vérification de mot de passe sécuritaire
         if (textboxes["TBNewPassword"].value != "" || textboxes["TBConfirmPassword"].value != "") {
             const regexMDP = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
-            if (!regexMDP.test(textboxes["TBNewPassword"])){
+            if (!regexMDP.test(textboxes["TBNewPassword"].value)){
                 isSafe = false;
                 textboxes["TBNewPassword"].classList.add("incomplet");
             } else {
@@ -215,6 +215,8 @@ async function afficherCompteClient(idCompte, isAdmin) {
         if (isComplete && telValid && confirmPassword && isSafe){
             formModif.classList.add("hide");
             formMDP.classList.remove("hide");
+            textboxes["TBNewPassword"].value = "";
+            textboxes["TBConfirmPassword"].value = "";
             const tvMDP = document.getElementById("tvMDP");
             if (isAdmin){
                 tvMDP.innerHTML = "Mot de passe ADMIN"
