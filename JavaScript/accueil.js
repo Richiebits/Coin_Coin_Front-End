@@ -19,9 +19,10 @@ async function init() {
     });
 }
 
+// Fonction qui s'occupe d'afficher des exemples de graphiques pour combler la page d'accueil
 function createAllCharts() {
 // ====================
-// 📊 Enhanced Vertical Bar Chart (graph1)
+// Graphe 1
 // ====================
 const barData = [10, 15, 30, 25, 20];
 const svg1 = d3.select("#graph1")
@@ -36,7 +37,6 @@ const height = 320 - marginBar.top - marginBar.bottom;
 const g = svg1.append("g")
     .attr("transform", `translate(${marginBar.left},${marginBar.top})`);
 
-// Scales
 const x = d3.scaleBand()
     .domain(barData.map((_, i) => i))
     .range([0, width])
@@ -46,7 +46,6 @@ const y = d3.scaleLinear()
     .domain([0, d3.max(barData)])
     .range([height, 0]);
 
-// Axes
 g.append("g")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).tickFormat(i => `Cat ${i + 1}`))
@@ -58,7 +57,6 @@ g.append("g")
     .selectAll("text")
     .style("font-size", "12px");
 
-// Bars
 const bars = g.selectAll(".bar")
     .data(barData)
     .enter()
@@ -72,17 +70,14 @@ const bars = g.selectAll(".bar")
     .on("mouseover", function(event, d, i) {
         const index = barData.indexOf(d);
     
-        // Smoothly hide the bar
         d3.select(this)
             .transition()
             .duration(300)
             .style("opacity", 0);
     
-        // 🧹 Clean up existing lollipops for this index (if any)
         g.selectAll(`.lollipop-line-${index}`).remove();
         g.selectAll(`.lollipop-circle-${index}`).remove();
     
-        // Add lollipop line with animation
         g.append("line")
             .attr("class", `lollipop-line-${index}`)
             .attr("x1", x(index) + x.bandwidth() / 2)
@@ -95,7 +90,6 @@ const bars = g.selectAll(".bar")
             .duration(300)
             .attr("y1", y(d));
     
-        // Add lollipop circle with animation
         g.append("circle")
             .attr("class", `lollipop-circle-${index}`)
             .attr("cx", x(index) + x.bandwidth() / 2)
@@ -108,7 +102,6 @@ const bars = g.selectAll(".bar")
             .attr("cy", y(d))
             .attr("r", 6);
     
-        // Show tooltip
         g.select(`#tooltip-${d}`)
             .transition()
             .duration(200)
@@ -118,13 +111,11 @@ const bars = g.selectAll(".bar")
     .on("mouseout", function(event, d, i) {
         const index = barData.indexOf(d);
     
-        // Smoothly bring the bar back
         d3.select(this)
             .transition()
             .duration(300)
             .style("opacity", 1);
     
-        // Animate removal of lollipop circle
         g.select(`.lollipop-circle-${index}`)
             .transition()
             .duration(200)
@@ -132,14 +123,12 @@ const bars = g.selectAll(".bar")
             .attr("cy", height)
             .remove();
     
-        // Animate removal of lollipop line
         g.select(`.lollipop-line-${index}`)
             .transition()
             .duration(200)
             .attr("y1", height)
             .remove();
     
-        // Hide tooltip
         g.select(`#tooltip-${d}`)
             .transition()
             .duration(200)
@@ -152,7 +141,6 @@ const bars = g.selectAll(".bar")
     .attr("y", d => y(d))
     .attr("height", d => height - y(d));
 
-// Tooltips (floating numbers above bars)
 g.selectAll(".tooltip")
     .data(barData)
     .enter()
@@ -168,14 +156,14 @@ g.selectAll(".tooltip")
     .style("opacity", 0);
 
 // ====================
-// 🥧 Pie Chart (graph2)
+// Graphe 2
 // ====================
 const pieData = [1, 2, 3, 4];
 const categories = ["Crypto", "Stocks", "Dividends", "Travail"];
 const total = d3.sum(pieData);
 const pie = d3.pie().sort(null)(pieData);
 const arc = d3.arc().innerRadius(0).outerRadius(80);
-const arcHover = d3.arc().innerRadius(0).outerRadius(95); // Slightly larger on hover
+const arcHover = d3.arc().innerRadius(0).outerRadius(95);
 const color = d3.scaleOrdinal(d3.schemeSet2);
 
 const svg2 = d3.select("#graph2")
@@ -186,25 +174,23 @@ const svg2 = d3.select("#graph2")
 const pieGroup = svg2.append("g")
     .attr("transform", "translate(155,120)");
 
-// Append group for each slice so we can easily manage slice + label
 const slices = pieGroup.selectAll(".slice")
     .data(pie)
     .enter()
     .append("g")
     .attr("class", "slice");
 
-// Append the slice path
 slices.append("path")
     .attr("fill", (d, i) => color(i))
     .attr("stroke", "#fff")
     .attr("stroke-width", 2)
-    .attr("d", d3.arc().innerRadius(0).outerRadius(0)) // animate from center
-    .each(function(d) { this._current = d; }) // store initial state for transitions
+    .attr("d", d3.arc().innerRadius(0).outerRadius(0))
+    .each(function(d) { this._current = d; })
     .on("mouseover", function(event, d) {
         d3.select(this)
             .transition()
             .duration(300)
-            .attr("d", arcHover); // expand
+            .attr("d", arcHover);
 
         d3.select(this.parentNode).select("text")
             .style("visibility", "visible");
@@ -213,7 +199,7 @@ slices.append("path")
         d3.select(this)
             .transition()
             .duration(300)
-            .attr("d", arc); // shrink back
+            .attr("d", arc);
 
         d3.select(this.parentNode).select("text")
             .style("visibility", "hidden");
@@ -229,10 +215,8 @@ slices.append("path")
         return t => arc(interpolate(t));
     });
 
-    // Arc used only for label positioning (outside the pie)
 const labelArc = d3.arc()
-.innerRadius(100)  // push labels out
-.outerRadius(100);
+.innerRadius(100).outerRadius(100);
 
 slices.append("text")
 .text(d => categories[d.index])
@@ -242,7 +226,7 @@ slices.append("text")
 })
 .style("text-anchor", function(d) {
     const midAngle = (d.startAngle + d.endAngle) / 2;
-    return midAngle < Math.PI ? "start" : "end"; // dynamic alignment
+    return midAngle < Math.PI ? "start" : "end";
 })
 .style("font-size", "13px")
 .style("font-weight", "bold")
@@ -250,11 +234,7 @@ slices.append("text")
 .style("visibility", "hidden")
 .style("pointer-events", "none");
 
-    
-
-// ====================
-// 📏 Percentage Scale
-// ====================
+// Pourcentages
 const legendHeight = 160;
 const legendWidth = 20;
 
@@ -306,30 +286,26 @@ gradientScale.append("g")
 
 
 // =====================
-// 📈 Redesigned Line Chart (graph3)
+// Graphe 3
 // =====================
 
 const lineData = [5, 10, 8, 15, 12, 18];
 
-// Set up the SVG and margins
 const svg3 = d3.select("#graph3")
     .append("svg")
-    .attr("width", 400)  // Increased width
-    .attr("height", 350);  // Increased height for more space
+    .attr("width", 400)
+    .attr("height", 350);
 
-const marginLine = { top: 20, right: 20, bottom: 40, left: 50 };  // Adjusted margins
+const marginLine = { top: 20, right: 20, bottom: 40, left: 50 };
 const widthLine = 400 - marginLine.left - marginLine.right;
 const heightLine = 350 - marginLine.top - marginLine.bottom;
 
-// Set up scales
 const xLine = d3.scaleLinear().domain([0, lineData.length - 1]).range([0, widthLine]);
 const yLine = d3.scaleLinear().domain([0, d3.max(lineData)]).range([heightLine, 0]);
 
-// Create a group for the chart's elements
 const lineGroup = svg3.append("g")
     .attr("transform", `translate(${marginLine.left},${marginLine.top})`);
 
-// X axis with modern ticks
 lineGroup.append("g")
     .attr("transform", `translate(0,${heightLine})`)
     .call(d3.axisBottom(xLine)
@@ -347,7 +323,6 @@ lineGroup.append("g")
     .style("fill", "#333")
     .style("font-weight", "bold");
 
-// Y axis with modern ticks and labels
 lineGroup.append("g")
     .call(d3.axisLeft(yLine)
         .ticks(5)
@@ -363,11 +338,10 @@ lineGroup.append("g")
     .style("fill", "#555")
     .style("font-weight", "bold");
 
-// Line with smooth transitions
 const line = d3.line()
     .x((d, i) => xLine(i))
     .y(d => yLine(d))
-    .curve(d3.curveMonotoneX); // Smoother curve
+    .curve(d3.curveMonotoneX);
 
 lineGroup.append("path")
     .datum(lineData)
@@ -381,7 +355,6 @@ lineGroup.append("path")
     .duration(1500)
     .attr("stroke-dashoffset", 0);
 
-// Circle markers for data points with smooth transitions
 lineGroup.selectAll("circle")
     .data(lineData)
     .enter()
@@ -395,7 +368,6 @@ lineGroup.selectAll("circle")
     .duration(300)
     .attr("r", 5);
 
-// Labels for data points with subtle fade-in animation
 lineGroup.selectAll("text.label")
     .data(lineData)
     .enter()
@@ -413,7 +385,6 @@ lineGroup.selectAll("text.label")
     .duration(300)
     .style("opacity", 1);
 
-// Hover interaction with improved design (focus ball and line)
 const focusBall = lineGroup.append("circle")
     .attr("r", 6)
     .attr("fill", "#1f77b4")
@@ -425,7 +396,6 @@ const focusLine = lineGroup.append("line")
     .attr("stroke-dasharray", "4 2")
     .style("display", "none");
 
-// Capture mouse hover over the graph area
 svg3.append("rect")
     .attr("transform", `translate(${marginLine.left},${marginLine.top})`)
     .attr("width", widthLine)

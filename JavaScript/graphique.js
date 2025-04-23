@@ -430,7 +430,7 @@ async function initGraphique() {
         svg.append("g")
             .call(yAxis);
 
-            svg.append("text")
+        svg.append("text")
             .attr("x", width + 30)  
             .attr("y", height + 20)  
             .attr("text-anchor", "end") 
@@ -438,18 +438,18 @@ async function initGraphique() {
             .text((dateFin).toISOString().split('T')[0]);
 
         svg.append("text")
-        .attr("x", width + 30)  
-        .attr("y", height + 35)  
-        .attr("text-anchor", "end") 
-        .style("font-size", "14px")
-        .text("(Jour)");
+            .attr("x", width + 30)  
+            .attr("y", height + 35)  
+            .attr("text-anchor", "end") 
+            .style("font-size", "14px")
+            .text("(Jour)");
 
         svg.append("text")
-        .attr("x", -45)
-        .attr("y", 5)  
-        .attr("text-anchor", "end") 
-        .style("font-size", "14px")
-        .text("($)");
+            .attr("x", -45)
+            .attr("y", 5)  
+            .attr("text-anchor", "end") 
+            .style("font-size", "14px")
+            .text("($)");
 
 
         const line = d3.line()
@@ -568,25 +568,25 @@ async function initGraphique() {
         svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(6));
         svg.append("g").call(d3.axisLeft(yScale));
 
-    const tooltip = d3.select(".graphique")
-        .append("div")
-        .style("position", "absolute")
-        .style("background", "white")
-        .style("border", "1px solid black")
-        .style("padding", "5px")
-        .style("border-radius", "5px")
-        .style("visibility", "hidden")
-        .style("font-size", "14px");
+        const tooltip = d3.select(".graphique")
+            .append("div")
+            .style("position", "absolute")
+            .style("background", "white")
+            .style("border", "1px solid black")
+            .style("padding", "5px")
+            .style("border-radius", "5px")
+            .style("visibility", "hidden")
+            .style("font-size", "14px");
 
-    const trackingCircle = svg.append("circle")
-        .attr("r", 8)
-        .attr("fill", "#E8B86D")
-        .style("visibility", "hidden");
+        const trackingCircle = svg.append("circle")
+            .attr("r", 8)
+            .attr("fill", "#E8B86D")
+            .style("visibility", "hidden");
 
-    svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("fill", "transparent");
+        svg.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("fill", "transparent");
 
         d3.select(".graphique")
         .on("mousemove", function(event) {
