@@ -345,7 +345,7 @@ async function initGraphique() {
                 if (jourDepuisDebut >= 0 && jourDepuisDebut <= jourAjourdhui) {
                     transactions.push({
                         day: jourDepuisDebut,
-                        value: entry.type === 'depot' ? entry.montant : entry.montant
+                        value: entry.type === 'depot' ? entry.montant : -entry.montant
                     });
                 }
             });
