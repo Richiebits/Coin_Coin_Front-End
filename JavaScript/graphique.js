@@ -307,7 +307,7 @@ async function initGraphique() {
 
         if (revenus) {
             revenus.forEach(revenu => {
-                if (revenu.depot_recurrence) {
+                if (revenu.depot_recurrence && revenu.montant) {
                     console.log(`Revenu récurrent: ${revenu.montant}, fréquence: ${revenu.depot_recurrence}`);
             
                     for (let jour = revenu.depot_recurrence; jour <= jourAjourdhui; jour += revenu.depot_recurrence) {
@@ -322,7 +322,7 @@ async function initGraphique() {
 
         if (depenses) {
             depenses.forEach(depense => {
-                if (depense.retrait_recurrence) {
+                if (depense.retrait_recurrence && depense.montant) {
                     console.log(`Dépense récurrente: ${depense.montant}, fréquence: ${depense.retrait_recurrence}`);
             
                     for (let jour = depense.retrait_recurrence; jour <= jourAjourdhui; jour += depense.retrait_recurrence) {
@@ -369,7 +369,6 @@ async function initGraphique() {
                 value: cumulativeValue
             };
         });
-
 
         console.log(transactions);
 

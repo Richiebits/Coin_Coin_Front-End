@@ -46,7 +46,7 @@ const y = d3.scaleLinear()
 
 g.append("g")
     .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x).tickFormat(i => `Cat ${i + 1}`))
+    .call(d3.axisBottom(x).tickFormat(i => `Mois ${i + 1}`))
     .selectAll("text")
     .style("font-size", "12px");
 
