@@ -307,7 +307,7 @@ async function initGraphique() {
 
         if (revenus) {
             revenus.forEach(revenu => {
-                if (revenu.depot_recurrence && revenu.montant) {
+                if (revenu.depot_recurrence) {
                     console.log(`Revenu récurrent: ${revenu.montant}, fréquence: ${revenu.depot_recurrence}`);
             
                     for (let jour = revenu.depot_recurrence; jour <= jourAjourdhui; jour += revenu.depot_recurrence) {
@@ -322,7 +322,7 @@ async function initGraphique() {
 
         if (depenses) {
             depenses.forEach(depense => {
-                if (depense.retrait_recurrence && depense.montant) {
+                if (depense.retrait_recurrence) {
                     console.log(`Dépense récurrente: ${depense.montant}, fréquence: ${depense.retrait_recurrence}`);
             
                     for (let jour = depense.retrait_recurrence; jour <= jourAjourdhui; jour += depense.retrait_recurrence) {
@@ -345,7 +345,7 @@ async function initGraphique() {
                 if (jourDepuisDebut >= 0 && jourDepuisDebut <= jourAjourdhui) {
                     transactions.push({
                         day: jourDepuisDebut,
-                        value: entry.type === 'depot' ? entry.montant : -entry.montant
+                        value: entry.type === 'depot' ? entry.montant : entry.montant
                     });
                 }
             });
@@ -369,6 +369,7 @@ async function initGraphique() {
                 value: cumulativeValue
             };
         });
+
 
         console.log(transactions);
 
@@ -479,7 +480,7 @@ async function initGraphique() {
                 if (jourDepuisDebut >= 0 && jourDepuisDebut <= jourAjourdhui) {
                     transactionSimuler.push({
                         day: jourDepuisDebut,
-                        value: entry.type === 'depot' ? entry.montant : -entry.montant
+                        value: entry.type === 'depot' ? entry.montant : entry.montant
                     });
                 }
             });
