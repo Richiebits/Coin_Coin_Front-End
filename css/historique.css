@@ -21,10 +21,9 @@ header {
 #head {
     background-color: #FCDE70;
     display: flex;
-    
     margin:0;
     font-family: 'Junge';
-    color: 45474B;
+    color: #45474B;
     font-size: x-large;
     align-items: center;
     height: 9rem;
