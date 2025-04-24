@@ -61,11 +61,22 @@ async function afficherComptesAdmin() {
             btnDelete.classList.add("btn", "btn-delete");
             btnDelete.addEventListener("click", async () => {
 
-                if (window.confirm("Être-vous certain de vouloir supprimer ce compte")){
+                 const MDPADMIN = window.prompt("Entrer le mot de passe pour confirmer la suppression:");
+                if (MDPADMIN){
+                    const routeADMIN = "client/connexion";
+                    const bodyConnADMIN = {  "email": sessionStorage.getItem("email"),
+                        "mot_de_passe": MDPADMIN};
                     try {
-                        const routeDelete = "client/" + `${element.id}`;
-                        const responseDelete = await fetchInfo(routeDelete, "DELETE", null, null);
-                        alert("Le compte à été supprimé avec succès");
+                        const responseADMIN = await fetchInfo(routeADMIN, "POST", {}, bodyConnADMIN);
+                        if (!responseADMIN || Object.keys(responseADMIN).length === 0) {
+                            alert("Erreur de mot de passe.");
+                        } else {
+                            const routeDelete = "client/" + `${element.id}`;
+                            const responseDelete = await fetchInfo(routeDelete, "DELETE", null, null);
+                            alert("Le compte à été supprimé avec succès");
+                        }
+
+                        
                     } catch (error) {
                         console.error("Erreur lors de la suppression du comptes:", error);
                     }
