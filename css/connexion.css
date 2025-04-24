@@ -176,7 +176,6 @@ input[type=button].loading {
     border-radius: 6px;
     padding: 5px 0;
   
-    /* Position du tooltip */
     position: absolute;
     z-index: 1;
     top: 100%;

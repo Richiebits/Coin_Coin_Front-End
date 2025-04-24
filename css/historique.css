@@ -83,7 +83,7 @@ a.pages:focus::after {
 #historique-container {
     font-family: 'Junge';
     padding: 2rem;
-    margin-top: 12rem; /* to avoid overlap with fixed header */
+    margin-top: 12rem; 
 }
 
 #historique-container h2 {

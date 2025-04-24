@@ -35,8 +35,6 @@ async function gestionTransaction() {
     const inputRetrait = document.getElementById("retraitMontant");
     const containerDepot = document.getElementById("depotInputContainer");
     const containerRetrait = document.getElementById("retraitInputContainer");
-
-    // NOUVEAUX BOUTONS
     const btnConfirmerDepot = document.getElementById("btnConfirmerDepot");
     const btnConfirmerRetrait = document.getElementById("btnConfirmerRetrait");
 
@@ -57,7 +55,6 @@ async function gestionTransaction() {
         return budgets.length ? { budgetId: budgets[0].id, projetId: projet.id } : null;
     }
 
-    // Toggle visibility for btnDepot
     btnDepot.addEventListener("click", () => {
         if (depotOpen) {
             containerDepot.style.display = "none";
@@ -69,7 +66,6 @@ async function gestionTransaction() {
         depotOpen = !depotOpen;
     });
 
-    // Toggle visibility for btnRetrait
     btnRetrait.addEventListener("click", () => {
         if (retraitOpen) {
             containerRetrait.style.display = "none";
@@ -105,7 +101,7 @@ async function gestionTransaction() {
 
             projet_id: info.projetId,
             client_id: sessionStorage.getItem("id"),
-            date_histo: new Date().toISOString().split("T")[0], // format YYYY-MM-DD
+            date_histo: new Date().toISOString().split("T")[0],
             type: "depot",
             montant: montant
         };
@@ -147,7 +143,7 @@ async function gestionTransaction() {
 
             projet_id: info.projetId,
             client_id: sessionStorage.getItem("id"),
-            date_histo: new Date().toISOString().split("T")[0], // format YYYY-MM-DD
+            date_histo: new Date().toISOString().split("T")[0],  
             type: "retrait",
             montant: -montant
         };
@@ -385,7 +381,6 @@ async function initGraphique() {
             return { day: transaction.day, value: cumulativeValue };
         });
 
-        // AFFICHER INFO DU PROJET ICI
         if (butEpargne - cumulativeValue > 0) {
             let montantRestant = butEpargne - cumulativeValue;
             const section = document.getElementById("description");
@@ -432,10 +427,10 @@ async function initGraphique() {
 
         svg.append("text")
             .attr("x", width + 30)  
-            .attr("y", height + 20)  
+            .attr("y", height + 50)  
             .attr("text-anchor", "end") 
             .style("font-size", "14px")
-            .text((dateFin).toISOString().split('T')[0]);
+            .text("Date de fin du budget : " + (dateFin).toISOString().split('T')[0]);
 
         svg.append("text")
             .attr("x", width + 30)  

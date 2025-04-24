@@ -187,7 +187,6 @@ left: 10px;
 right: 10px;
 bottom: 0px;
 background: linear-gradient(to right, transparent 10%, rgba(0, 0, 0, 0.1) 10%);
-            /*linear-gradient(to top, transparent 20%, rgba(0, 0, 0, 0.2) 20%);*/
 background-size: 100px 100px;
 }
 
@@ -236,8 +235,6 @@ flex-direction: column;
   margin-top: 10px;
 }
 
-
-/* Boutons confirmer dépôt/retrait */
 .btn-confirmer {
   margin-top: 10px;
   padding: 8px 16px;

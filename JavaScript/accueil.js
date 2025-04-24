@@ -19,11 +19,9 @@ async function init() {
     });
 }
 
-// Fonction qui s'occupe d'afficher des exemples de graphiques pour combler la page d'accueil
 function createAllCharts() {
-// ====================
+    
 // Graphe 1
-// ====================
 const barData = [10, 15, 30, 25, 20];
 const svg1 = d3.select("#graph1")
     .append("svg")
@@ -155,9 +153,7 @@ g.selectAll(".tooltip")
     .style("font-weight", "bold")
     .style("opacity", 0);
 
-// ====================
 // Graphe 2
-// ====================
 const pieData = [1, 2, 3, 4];
 const categories = ["Crypto", "Stocks", "Dividends", "Travail"];
 const total = d3.sum(pieData);
@@ -234,7 +230,6 @@ slices.append("text")
 .style("visibility", "hidden")
 .style("pointer-events", "none");
 
-// Pourcentages
 const legendHeight = 160;
 const legendWidth = 20;
 
@@ -285,10 +280,7 @@ gradientScale.append("g")
     .style("font-size", "11px");
 
 
-// =====================
 // Graphe 3
-// =====================
-
 const lineData = [5, 10, 8, 15, 12, 18];
 
 const svg3 = d3.select("#graph3")
@@ -341,7 +333,7 @@ lineGroup.append("g")
 const line = d3.line()
     .x((d, i) => xLine(i))
     .y(d => yLine(d))
-    .curve(d3.curveMonotoneX);
+    .curve(d3.curveCatmullRom.alpha(0.5));
 
 lineGroup.append("path")
     .datum(lineData)
