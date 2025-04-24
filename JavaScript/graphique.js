@@ -363,12 +363,13 @@ async function initGraphique() {
 
         let cumulativeValue = 0;
         transactions = transactions.map(transaction => {
-            cumulativeValue += transaction.value;
+            cumulativeValue = Math.max(0, cumulativeValue + transaction.value);
             return {
                 day: transaction.day,
                 value: cumulativeValue
             };
         });
+
 
         console.log(transactions);
 
@@ -376,10 +377,11 @@ async function initGraphique() {
         let maxYValue = butEpargne;
 
         transactions = transactions.sort((a, b) => a.day - b.day).map(transaction => {
-            cumulativeValue += transaction.value;
+            cumulativeValue = Math.max(0, cumulativeValue + transaction.value);
             if (cumulativeValue > maxYValue) maxYValue = cumulativeValue;
             return { day: transaction.day, value: cumulativeValue };
         });
+
 
         if (butEpargne - cumulativeValue > 0) {
             let montantRestant = butEpargne - cumulativeValue;
@@ -507,8 +509,8 @@ async function initGraphique() {
 
         const predictionLine = d3.line()
             .x(d => xScale(d.day))
-            .y(d => yScale(d.value))
-            .curve(d3.curveMonotoneX);
+            .y(d => yScale(d.value));
+            //.curve(d3.curveMonotoneX);
 
         svg.append("path")
             .datum(predictionLineData)
